@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>document.write('<base href="' + (/^\/sf(\/|$)/.test(location.pathname) ? "/sf/" : "/") + '">');  // smallsf.com, or the old dutilh.net/sf proxy</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌁</text></svg>">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About Small SF · How it's made</title>
+<script>
+  // which tab to show (Story, Changes, Credits, Support), set before the page draws so there's no flash of the wrong one.
+  // #help is the donate box's old address (the map's TV menu links to it): it opens Support
+  (function () { var h = location.hash.slice(1).toLowerCase(), m = { story: "story", changes: "changes", credits: "credits", support: "support", help: "support" }; document.documentElement.dataset.tab = m[h] || "story"; })();
+</script>
+<meta name="description" content="A 3D model of San Francisco, redrawn tile by tile by an image model and stitched into one map, with live Muni, boats, planes and fog moving through it.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Drawing San Francisco, one block at a time">
+<meta property="og:description" content="A 3D model of the city, redrawn 1,322 tiles at a time and stitched into one map, with live Muni, boats, planes and fog.">
+<link rel="canonical" href="https://smallsf.com/about">
+<meta property="og:url" content="https://smallsf.com/about">
+<meta property="og:image" content="https://smallsf.com/how/share.gif?v=5">
+<meta property="og:image:type" content="image/gif">
+<meta property="og:image:width" content="600">
+<meta property="og:image:height" content="315">
+<meta property="og:image" content="https://smallsf.com/how/share-still.jpg?v=4">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The clouds part over an illustrated San Francisco, then the map zooms in on the Ferry Building">
+<meta property="og:video" content="https://smallsf.com/how/share.mp4?v=4">
+<meta property="og:video:secure_url" content="https://smallsf.com/how/share.mp4?v=4">
+<meta property="og:video:type" content="video/mp4">
+<meta property="og:video:width" content="1200">
+<meta property="og:video:height" content="630">
+<meta property="og:site_name" content="Small SF">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://smallsf.com/how/share-still.jpg?v=4">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&family=Luckiest+Guy&display=swap">
+<style>
+  :root { --paper: #EBE6DC; --card: #F6F1E7; --line: #E3DAC2; --ink: #23201c; --text: #3a352e; --soft: #6f675c; --mute: #8a8173; --coral: #EE5D4A; --dot: rgba(35,32,28,.35);
+          --serif: "Cormorant Garamond", Georgia, serif; --sans: Inter, -apple-system, system-ui, sans-serif; }
+  :root { color-scheme: light; }   /* always the paper look, like the map by day */
+  * { box-sizing: border-box; }
+  html { background: var(--paper); }
+  body { margin: 0; background: var(--paper); color: var(--text); font: 21px/1.55 var(--serif); -webkit-font-smoothing: antialiased; }
+  main { max-width: 700px; margin: 0 auto; padding: 56px 20px 96px; }
+  .back { font: 500 13px var(--sans); color: var(--soft); text-decoration: none; border-bottom: 1px dotted var(--dot); }
+  /* the top row: back to the map on the left, the tabs on the right */
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; }
+  .back:hover { color: var(--coral); border-color: var(--coral); }
+  .kicker { margin: 36px 0 8px; font: 600 11px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--coral); }
+  h1 { margin: 0 0 14px; font: 500 52px/1.02 var(--serif); color: var(--ink); letter-spacing: -.01em; }
+  .dek { margin: 0 0 8px; font: italic 400 24px/1.4 var(--serif); color: var(--soft); }
+  .by { margin: 0 0 40px; font: 13px var(--sans); color: var(--mute); }
+  .by .views .n { font-variant-numeric: tabular-nums; }
+  .by .views.bump .n { color: var(--ink); transition: color .25s; }
+  h2 { margin: 56px 0 12px; font: 500 32px/1.1 var(--serif); color: var(--ink); }
+  p { margin: 0 0 18px; }
+  a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--dot); }
+  a:hover { color: var(--coral); border-color: var(--coral); }
+  b, strong { font-weight: 500; color: var(--ink); }
+  figure { margin: 28px -20px 32px; }
+  /* wide figures break out of the text column, up to 1240 px (keeping a 16 px gutter on small screens) */
+  figure.wide { --w: min(1240px, calc(100vw - 32px)); width: var(--w); margin-left: calc((100% - var(--w)) / 2); margin-right: 0; }
+  figure.wide figcaption { max-width: 660px; margin-left: auto; margin-right: auto; }
+  figure img { display: block; width: 100%; height: auto; border-radius: 10px; }
+  figcaption { margin: 10px 20px 0; font: 13px/1.5 var(--sans); color: var(--mute); }
+  .ba { position: relative; border-radius: 10px; overflow: hidden; touch-action: pan-y; user-select: none; background: var(--card); }
+  .ba img { border-radius: 0; }
+  .ba .top { position: absolute; inset: 0; clip-path: inset(0 50% 0 0); }
+  .ba .top img { width: 100%; height: 100%; object-fit: cover; }
+  .ba .bar { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 8px rgba(0,0,0,.35); pointer-events: none; }
+  .ba .bar::after { content: ""; position: absolute; top: 50%; left: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.3); }
+  .ba .lab { position: absolute; top: 12px; padding: 4px 9px; border-radius: 99px; background: rgba(0,0,0,.55); color: #fff; font: 500 12px var(--sans); pointer-events: none; }
+  .ba .lab.l { left: 12px; } .ba .lab.r { right: 12px; }
+  .ba input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  figure video { display: block; width: 100%; height: auto; border-radius: 10px; background: var(--card); }
+  .cov { position: relative; background: var(--card); border-radius: 10px; padding: 14px; }
+  .cov img { border-radius: 0; }
+  .cov .pin { position: absolute; transform: translate(-50%, -50%); width: 28px; height: 28px; border-radius: 50%; background: var(--coral); color: #fff; font: 600 13px/1 var(--sans); display: grid; place-items: center; font-variant-numeric: tabular-nums; box-shadow: 0 2px 8px rgba(0,0,0,.35); border: 2px solid #fff; }
+  ol.order { margin: 12px 20px 0; padding: 0; list-style: none; columns: 2; column-gap: 24px; font: 13px/1.5 var(--sans); color: var(--mute); }
+  ol.order li { break-inside: avoid; margin-bottom: 4px; }
+  ol.order b { display: inline-grid; place-items: center; vertical-align: -5px; width: 20px; height: 20px; margin-right: 6px; border-radius: 50%; background: var(--coral); color: #fff; font: 600 11px/1 var(--sans); }
+  ol.order span { color: var(--soft); }
+  .trio { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 8px; align-items: center; }
+  .trio img, .trio video { border-radius: 8px; width: 100%; display: block; }
+  .nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; margin: 28px 0 32px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .nums div { background: var(--card); padding: 14px 16px; }
+  .nums b { display: block; font: 500 30px/1 var(--serif); color: var(--ink); }
+  .nums span { display: block; margin-top: 6px; font: 12.5px/1.4 var(--sans); color: var(--mute); }
+  .nums b small { font-size: .55em; color: var(--mute); font-weight: 500; }
+  ul.live { list-style: none; padding: 0; margin: 0 0 18px; }
+  ul.live li { margin: 0 0 10px; padding-left: 18px; position: relative; }
+  ul.live li::before { content: ""; position: absolute; left: 0; top: .62em; width: 7px; height: 7px; background: var(--coral); }
+  .end { margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); font: 14px/1.6 var(--sans); color: var(--mute); }
+  /* tabs: Story, Changes, Credits, Support, as a light line of small text: under the launch video on the Story, under the
+     dek on the others (scripts move it). The Story is the main read; the rest are quiet extras */
+  .tabs { display: flex; flex-wrap: wrap; align-items: baseline; margin: 14px 0 0; font: 13px/1.5 var(--sans); color: var(--mute); }
+  figure .tabs { max-width: 660px; margin: 12px auto 0; padding: 0 20px; }
+  figure.wide .tabs { padding: 0; }
+  .tabs a { border: 0; color: var(--mute); -webkit-tap-highlight-color: transparent; transition: color .15s; }
+  .tabs a + a::before { content: "·"; display: inline-block; margin: 0 9px; color: var(--soft); opacity: .6; pointer-events: none; }
+  .tabs a:hover, .tabs a[aria-selected="true"] { color: var(--coral); }
+  .tabs a:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; border-radius: 2px; }
+  /* chapter rail (Story, wide screens): a thin strip of the city in the left margin that draws itself in as you read. Below
+     the reading point it's still the raw 3D render, above it the finished drawing, with a coral line where you are and a
+     notch at each chapter. Hover names the chapter at that height; a click goes there. It sits clear of the wide figures */
+  .rail { position: fixed; left: 26px; top: 50%; transform: translateY(-50%); z-index: 8; display: none; width: 70px; opacity: 0; transition: opacity .35s; }
+  @media (min-width: 1300px) { html[data-tab="story"] .rail { display: block; } }
+  .rail.on { opacity: 1; }
+  .rail .strip { position: relative; width: 48px; height: 343px; border-radius: 9px; overflow: hidden; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; border: 1px solid var(--line); box-shadow: 0 6px 18px -8px rgba(35,32,28,.35); background: var(--card); }
+  .rail .strip i { position: absolute; inset: 0; background-size: cover; background-position: center; }
+  .rail .strip .r { background-image: url(how/rail-render.webp); filter: saturate(.75); }
+  .rail .strip .d { background-image: url(how/rail-drawn.webp); clip-path: inset(0 0 calc(100% - var(--p, 0%)) 0); }
+  .rail .strip .now { position: absolute; left: -1px; right: -1px; top: var(--p, 0%); height: 2px; margin-top: -1px; background: var(--coral); box-shadow: 0 0 0 1px rgba(255,255,255,.6); }
+  .rail .strip .hov { position: absolute; left: 0; right: 0; height: 1px; background: rgba(35,32,28,.55); opacity: 0; transition: opacity .12s; }
+  .rail.hover .strip .hov { opacity: 1; }
+  .rail.drag .strip { cursor: grabbing; }
+  .rail.drag .strip .hov { opacity: 0; }
+  .rail .notch { position: absolute; left: 53px; width: 7px; height: 1.5px; margin-top: -1px; background: var(--soft); opacity: .45; border-radius: 1px; transition: width .15s, opacity .15s, background .15s; }
+  .rail .notch.read { opacity: .9; }
+  .rail .notch.cur { background: var(--coral); opacity: 1; width: 11px; }
+  .rail .notch.near { width: 13px; opacity: 1; }
+  .rail .pct { margin: 8px 0 0 -10px; width: 68px; white-space: nowrap; text-align: center; font: 600 10.5px/1 var(--sans); letter-spacing: .06em; color: var(--mute); font-variant-numeric: tabular-nums; }
+  .rail .lab { position: absolute; left: 72px; top: 0; transform: translateY(-50%); white-space: nowrap; pointer-events: none; padding: 6px 11px 7px; border-radius: 8px; background: var(--card); border: 1px solid var(--line);
+    box-shadow: 0 4px 14px rgba(35,32,28,.12); font: 500 12.5px/1 var(--sans); color: var(--ink); opacity: 0; transition: opacity .15s; }
+  .rail .lab b { color: var(--coral); font-weight: 600; margin-right: 6px; font-variant-numeric: tabular-nums; }
+  .rail.hover .lab { opacity: 1; }
+  .rail .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .rail .sr:focus-visible { position: fixed; left: 26px; top: 16px; width: auto; height: auto; clip: auto; padding: 4px 8px; background: var(--card); border: 1px solid var(--coral); border-radius: 6px; font: 12px var(--sans); }
+  html:not([data-tab]) .tabs { display: none; }   /* without scripts, every section just shows, one after another */
+  html[data-tab] .panel { display: none; }
+  html[data-tab="story"] #tab-story, html[data-tab="changes"] #tab-changes, html[data-tab="credits"] #tab-credits, html[data-tab="support"] #tab-support { display: block; }
+  /* Changes: a timeline, newest first. The date sits left of a thin line with a coral dot per day; days that drew a new
+     neighborhood lead with a still of it (from the live drawing, links to that spot), and features link into the map */
+  .days { margin: 34px 0 0; }
+  .day { position: relative; display: grid; grid-template-columns: 104px 1fr; }
+  .day::before { content: ""; position: absolute; left: 99px; top: 9px; width: 9px; height: 9px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 4px var(--paper); z-index: 1; }
+  .day .when { padding: 0 24px 0 0; text-align: right; }
+  .day .when b { display: block; font: 500 21px/1.1 var(--serif); color: var(--ink); white-space: nowrap; }
+  .day .when span { display: block; margin-top: 4px; font: 600 11px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--soft); }
+  .day .what { border-left: 1px solid var(--line); padding: 2px 0 38px 28px; min-width: 0; }
+  .day:last-child .what { padding-bottom: 4px; }
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 0 0 18px; }
+  .shot { position: relative; display: block; border: 0; border-radius: 10px; overflow: hidden; background: var(--card); }
+  .shot img { display: block; width: 100%; height: auto; aspect-ratio: 960 / 504; object-fit: cover; transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+  .shot:hover img { transform: scale(1.04); }
+  .shot span { position: absolute; left: 10px; bottom: 10px; padding: 5px 11px 6px; border-radius: 99px; background: rgba(246,241,231,.94); color: var(--ink); font: 500 15px/1 var(--serif); box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+  .shot:hover span { color: var(--coral); }
+  .day ul.live li { margin-bottom: 9px; }
+  a.try { display: inline-block; margin-left: 6px; padding: 3px 9px 4px; border: 1px solid rgba(238,93,74,.4); border-radius: 99px; color: var(--coral); font: 600 12px/1 var(--sans); white-space: nowrap; vertical-align: 2px; transition: background .15s, color .15s; }
+  a.try:hover { background: var(--coral); color: #fff; border-color: var(--coral); }
+  /* Credits: a card per source, in the number row's look. Live ones read their feed when the tab opens, with a pulsing dot */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1px; margin: 30px 0 0; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .card { display: flex; flex-direction: column; background: var(--card); padding: 16px 18px 17px; min-height: 150px; }
+  .card:last-child:nth-child(odd) { grid-column: 1 / -1; }   /* an odd last card (Thanks) closes the grid across its full width */
+  .card .k { font: 600 11px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--soft); }
+  .card b { margin-top: 8px; font: 500 23px/1.15 var(--serif); color: var(--ink); }
+  .card b small { font-size: .7em; color: var(--mute); }
+  .card p { margin: 6px 0 0; font: 13px/1.45 var(--sans); color: var(--mute); }
+  .card .now { margin-top: auto; padding-top: 14px; font: 500 13px/1.35 var(--sans); color: var(--text); }
+  .card .now.live::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: var(--coral); vertical-align: 1px; animation: livedot 2s infinite; }
+  @keyframes livedot { 0% { box-shadow: 0 0 0 0 rgba(238,93,74,.55); } 70%, 100% { box-shadow: 0 0 0 7px rgba(238,93,74,0); } }
+  @media (max-width: 600px) {
+    .day { display: block; padding-left: 24px; border-left: 1px solid var(--line); }
+    .day::before { left: -5px; top: 6px; }
+    .day .when { text-align: left; padding: 0 0 12px; display: flex; gap: 10px; align-items: baseline; }
+    .day .what { border: 0; padding: 0 0 30px; }
+    .card { min-height: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .card .now.live::before { animation: none; } .shot img { transition: none; } }
+  #tab-support .fund { margin-top: 28px; }
+  #help { scroll-margin-top: 24px; }
+  #tab-story .fund { margin-top: 56px; }
+  .readers { margin: 28px 0 0; font: 14px/1.6 var(--sans); color: var(--mute); }
+  .fund + .aside { margin: 18px 0 0; font: 14px/1.6 var(--sans); color: var(--mute); }
+  .cta { display: inline-block; margin: 8px 0 0; padding: 10px 18px; border: 0; border-radius: 99px; background: var(--coral); color: #fff; font: 500 15px var(--sans); }
+  .simpwrap { position: relative; display: inline-block; }
+  .simppip { position: absolute; left: calc(100% + 14px); top: 50%; width: 200px; aspect-ratio: 4 / 3; transform: translateY(-50%) scale(.6) rotate(-3deg); opacity: 0; pointer-events: none;
+    border-radius: 10px; overflow: hidden; border: 3px solid #fff; box-shadow: 0 14px 30px -10px rgba(0,0,0,.45); background: #1a3fd0; transition: opacity .25s, transform .35s cubic-bezier(.2,1.4,.4,1); z-index: 5; }
+  .simppip.on { opacity: 1; transform: translateY(-50%) scale(1) rotate(-3deg); }
+  .simppip video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  @media (max-width: 760px) { .simppip { left: auto; right: 0; top: auto; bottom: calc(100% + 10px); transform: scale(.6) rotate(-3deg); width: 170px; } .simppip.on { transform: scale(1) rotate(-3deg); } }
+  button.simp { background: none; border: 0; padding: 0; cursor: pointer; transition: transform .15s; }
+  button.simp:hover { transform: rotate(-2deg) scale(1.06); }
+  .simp { font: 400 1.05em/1 "Luckiest Guy", var(--sans); letter-spacing: .02em; color: #FED90F; -webkit-text-stroke: 1.2px #1f1a0e; paint-order: stroke fill; text-shadow: 0 2px 0 #1f1a0e; white-space: nowrap; }
+  .cta:hover { color: #fff; filter: brightness(1.05); }
+  .fund { margin: 40px 0 0; padding: 26px 28px 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .fund h3 { margin: 0 0 8px; font: 500 28px/1.15 var(--serif); color: var(--ink); }
+  .fund p { margin: 0 0 16px; font-size: 19px; }
+  /* the two ways to pay fill the card's bottom edge, split down the middle */
+  .fund .btns { display: grid; grid-template-columns: 1fr 1fr; margin: 22px -28px 0; border-top: 1px solid var(--line); }
+  .fund .btns a { display: flex; align-items: center; justify-content: center; padding: 20px 12px; border: 0; border-radius: 0; background: var(--paper); color: var(--ink); font: 600 18px var(--sans); text-align: center; }
+  .fund .btns a + a { border-left: 1px solid var(--line); }
+  .fund .btns a.primary { background: var(--coral); border-color: var(--coral); color: #fff; }
+  .fund .btns a:hover { filter: brightness(1.04); color: inherit; }
+  .fund .btns a.primary:hover { color: #fff; }
+  /* the other way to help, a full-width row under the two ways to pay */
+  .fund .alt { display: block; margin: 0 -28px; padding: 17px 16px 18px; border: 0; border-top: 1px solid var(--line); background: var(--card); color: var(--ink); text-align: center; font: 500 17px var(--sans); transition: background .15s; }
+  .fund .alt b { font-weight: 600; color: var(--coral); }
+  .fund .alt:hover { background: #FAF6EE; color: var(--ink); }
+  .fund small { display: block; margin-top: 12px; font: 13px/1.5 var(--sans); color: var(--mute); }
+  @media (max-width: 600px) { body { font-size: 19px; } h1 { font-size: 40px; } h2 { font-size: 27px; } .dek { font-size: 21px; } }
+  .snd { position: fixed; right: 16px; bottom: 16px; z-index: 10; width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--card); color: var(--coral); cursor: pointer; box-shadow: 0 2px 10px rgba(35,32,28,.12); }
+  .snd:hover { border-color: var(--coral); }
+  /* back to the top: above the sound button, once you're a screen or so down */
+  .totop { position: fixed; right: 16px; bottom: 64px; z-index: 10; width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 50%;
+    background: var(--card); color: var(--coral); cursor: pointer; box-shadow: 0 2px 10px rgba(35,32,28,.12); opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .2s, transform .2s; }
+  .totop.on { opacity: 1; transform: none; pointer-events: auto; }
+  .totop:hover { border-color: var(--coral); }
+  .totop:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+  .totop svg { width: 18px; height: 18px; }
+  .snd:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+  .snd svg { width: 18px; height: 18px; }
+  .snd .off, .snd[aria-pressed="true"] .on { display: none; }
+  .snd[aria-pressed="true"] { color: var(--mute); }
+  .snd[aria-pressed="true"] .off { display: block; }
+  /* live text: three phrases in "Making it live" that do what they say. The page is washed with the map's own
+     light (the same multiply + soft-light tints atmosphere.js lays over the map), streetlights flick on, fog rolls by */
+  .lt { border-bottom: 1px dotted rgba(238,93,74,.7); cursor: default; border-radius: 2px; transition: color .6s ease, text-shadow .6s ease, background-color .6s ease; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  .lt:hover, .lt.on { border-bottom-color: var(--coral); }
+  .lt:focus { outline: none; }
+  .lt:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+  .lt.on { position: relative; z-index: 9; }   /* lifted above the wash, so the phrase itself keeps its own light */
+  .lt[data-fx="gold"].on { color: #a4560f; text-shadow: 0 0 14px rgba(255,176,84,.75), 0 0 2px rgba(255,214,150,.6); }
+  .lt[data-fx="night"].on { color: #2a2418; background-color: rgba(255,214,140,.5); box-shadow: 0 0 18px 6px rgba(255,206,120,.42); }
+  .fxw { position: fixed; inset: 0; z-index: 8; pointer-events: none; opacity: 0; transition: opacity .6s ease; }
+  .fxw.m { mix-blend-mode: multiply; } .fxw.s { mix-blend-mode: soft-light; }
+  .fxw.gold.m { background: radial-gradient(130% 100% at 92% 0%, rgba(255,184,120,.62), rgba(255,196,150,.42) 55%, rgba(240,170,140,.38)); }
+  .fxw.gold.s { background: radial-gradient(90% 80% at 92% 0%, rgba(255,170,90,.75), rgba(255,170,90,.25) 70%); }
+  .fxw.night.m { background: linear-gradient(180deg, rgba(92,100,160,.42), rgba(52,66,120,.52)); }
+  .fxw.night.s { background: rgba(40,60,120,.35); }
+  html[data-fx="gold"] .fxw.gold, html[data-fx="night"] .fxw.night { opacity: 1; }
+  /* the fog: a canvas of drifting fog banks over the page (drawn in the live-text script) */
+  .fogsky { position: fixed; inset: 0; z-index: 10; pointer-events: none; opacity: 0; transition: opacity .2s; }
+  .fogsky canvas { display: block; width: 100%; height: 100%; }
+  .lt[data-fx="fog"].on { color: #5d6670; }
+  .lamps { position: fixed; left: 0; right: 0; bottom: 0; height: 90px; z-index: 9; pointer-events: none; }
+  .lamp { position: absolute; width: 0; height: 0; opacity: 0; transition: opacity .5s ease; }
+  .lamp::before { content: ""; position: absolute; left: -38px; top: -26px; width: 76px; height: 52px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,204,122,.55), rgba(255,190,100,.18) 55%, transparent); }
+  .lamp::after { content: ""; position: absolute; left: -3px; top: -3px; width: 6px; height: 6px; border-radius: 50%; background: #fff4d6; box-shadow: 0 0 5px 2px rgba(255,214,140,.95), 0 0 14px 4px rgba(255,190,100,.5); }
+  html[data-fx="night"] .lamp { opacity: 1; transition-delay: calc(var(--i) * 110ms + 180ms); }
+  html[data-fx="night"] .lamp::after { animation: lamp-on .7s calc(var(--i) * 110ms + 180ms) both; }
+  @keyframes lamp-on { 0% { opacity: 0; } 18% { opacity: .8; } 30% { opacity: .15; } 46% { opacity: .95; } 58% { opacity: .55; } 100% { opacity: 1; } }
+  @media (max-width: 600px) { .lamp:nth-child(even) { display: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .lt, .fxw, .lamp { transition-duration: .4s; }
+    html[data-fx="night"] .lamp::after { animation: none; }
+  }
+
+.antword { cursor: default; text-decoration: underline dotted var(--mute); text-underline-offset: 3px; }
+.ant { position: fixed; left: 0; top: 0; width: 22px; height: 22px; pointer-events: none; z-index: 50; color: var(--ink); will-change: transform; }
+.ant svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.ant .l1 { transform-origin: 11px 11px; } .ant.step .l1 { transform: rotate(14deg); } .ant.step .l2 { transform: rotate(-14deg); } .ant .l2 { transform-origin: 11px 11px; }
+</style>
+<script>window.seline = window.seline || { queue: [], track: function () { this.queue.push({ method: "track", args: [].slice.call(arguments) }); } }; window.track = function (n, d) { try { window.seline.track(n, d); } catch (e) {} };</script>
+<script async src="https://cdn.seline.com/seline.js" data-token="1c6f21dbc7fdb1b" data-outbound="true"></script>
+</head>
+<body>
+<main>
+  <div class="topbar">
+  <a class="back" href="./">← Back to the map</a>
+  </div>
+
+  <section class="panel" id="tab-story" role="tabpanel" aria-labelledby="t-story">
+  <div class="kicker">How it's made</div>
+  <h1>Drawing San Francisco, one block at a time</h1>
+  <p class="dek">A 3D model of the city, redrawn tile by tile by an image model. Infused with simulated drivers and real airplanes, boats, public transit, and weather conditions.</p>
+  <p class="by"><a href="https://dutilh.net" target="_blank" rel="noopener">Ari Dutilh</a> · November 2026<span class="views" hidden> · <span class="n"></span> views</span></p>
+  <figure class="wide">
+    <video poster="how/features-v8.jpg" width="1920" height="1080" autoplay muted loop playsinline aria-label="The map's features: the clouds parting over the Ferry Building, a plane over the bay, traffic at 16th and Valencia, a robotaxi heading down South Van Ness to its pin, ferries by the Bay Bridge, Dolores Park, fog over the Haight, a TV departures board, sunset to streetlights, and a pull back over the whole city">
+      <source src="how/features-v8-av1.mp4" type='video/mp4; codecs="av01.0.08M.08"'>
+      <source src="how/features-v8.mp4" type="video/mp4">
+    </video>
+  <nav class="tabs" role="tablist" aria-label="About Small SF">
+    <a role="tab" id="t-story" href="about" data-tab="story" aria-controls="tab-story" aria-selected="true">Story</a>
+    <a role="tab" id="t-changes" href="about#changes" data-tab="changes" aria-controls="tab-changes" aria-selected="false" tabindex="-1">Changes</a>
+    <a role="tab" id="t-credits" href="about#credits" data-tab="credits" aria-controls="tab-credits" aria-selected="false" tabindex="-1">Thanks</a>
+    <a role="tab" id="t-support" href="about#support" data-tab="support" aria-controls="tab-support" aria-selected="false" tabindex="-1">Support</a>
+  </nav>
+  </figure>
+
+  <p><a href="./">Small SF</a> is one enormous illustration of San Francisco, from Alcatraz to Dolores Park and beyond, where you can explore the streets you know by dragging and zooming around. Muni runs through it with live data, boats appear in the bay whenever their transponders are switched on, you can spot planes flying by overhead, the lighting follows the real sun and weather, and the fog follows what a weather satellite sees.</p>
+  <p>This project started as a San Francisco version of <a href="https://isometricseattle.fun" target="_blank" rel="noopener">Isometric Seattle</a> made by Dylan Martin, which I happened to discover during my first trip to Seattle. It began as a fairly simple idea and kept growing into something far more complex, and far more alive. Buckle in.</p>
+
+  <div class="nums">
+    <div><b>1,322 <small>/ 2,925</small></b><span>tiles drawn, more than two fifths of the city</span></div>
+    <div><b>9.8 gigapixels</b><span>the size of the map image today</span></div>
+    <div><b id="livecount">300+</b><span>buses, trains, boats and planes moving on the map right now</span></div>
+    <div><b>1,562</b><span>real traffic lights running the simulated traffic</span></div>
+  </div>
+
+  <h2 id="model">Starting from a 3D model</h2>
+  <p>Everything starts from Google's Photorealistic 3D Tiles, the same 3D scans of the city you see in Google Earth. I (Claude) render them in a headless browser as an orthographic view: instead of shrinking with distance like a photo, everything is drawn at one scale, so parallel streets stay parallel and a building at the top of the screen is the same size as one at the bottom. The view tilts down 45° and looks at the city southwest from the bay. People call this kind of map isometric.</p>
+  <p>The whole city gets cut into a grid of tiles, each rendered at 2048 pixels. The renders are accurate but kind of ugly: melted trees, blobby cars, and buildings that sag or blend with generation seams.</p>
+
+  <h2 id="drawing">Turning renders into drawings</h2>
+  <p>Each tile goes to an image model with a prompt and an already-drawn tile as a style reference, and comes back as a 2880-pixel illustration of the exact same block. Drag the slider to compare:</p>
+  <figure class="wide">
+    <div class="ba" data-ba>
+      <img src="how/drawn.webp" alt="The same blocks of Potrero Hill, drawn" width="1500" height="1000">
+      <div class="top"><img src="how/render.webp" alt="A few blocks of Potrero Hill in Google's 3D tiles" width="1500" height="1000"></div>
+      <div class="bar"></div><span class="lab l">3D render</span><span class="lab r">Drawn</span>
+      <input type="range" min="0" max="100" value="50" aria-label="Compare the render and the drawing">
+    </div>
+    <figcaption>A few blocks of Potrero Hill. The drawing keeps every building, street and parked car where it is, and the melted blobs of the render come back as actual trees.</figcaption>
+  </figure>
+  <p>The first 300 or so tiles went through Higgsfield, and the rest through OpenAI's GPT Image 2 directly, at its largest size and highest quality. The cheaper settings didn't hold up: medium comes out softer, and low quality starts inventing back gardens that aren't there (which would be nice, but alas). High quality it is, everywhere.</p>
+  <figure class="wide">
+    <img src="how/quality.webp" alt="The same street corner drawn at high quality and 2880 pixels (left) and medium quality at 2048 pixels (right)" width="1500" height="806" loading="lazy">
+    <figcaption>Zoomed all the way in: 2880 pixels at high quality (left) against 2048 at medium (right). At full zoom, the windows, railings and rooftop gear are what you're looking at.</figcaption>
+  </figure>
+
+  <h2 id="growing">Growing the map</h2>
+  <p>I’ve been growing the map outward from the Ferry Building in one connected piece to keep illustrated SF as cohesive as possible even while unfinished. Here's every chunk so far, numbered in the order it went live:</p>
+  <figure class="wide">
+    <img src="how/growth.webp?v=mwqx6b59" alt="The whole drawn map with each part outlined and numbered in the order it went live, from the Embarcadero, SoMa, the Mission and Noe Valley first, out to Twin Peaks, North Beach and Russian Hill, and then Pacific Heights, the Marina, Bernal Heights, the Presidio and the Inner Richmond" width="1600" height="1008" loading="lazy">
+    <figcaption>The drawn map today, numbered in the order each part went live.</figcaption>
+  </figure>
+  <p>Inside a chunk, tiles go to OpenAI in batches of 15, and each batch comes back whenever OpenAI gets to it, so halfway through, a neighborhood looks like a patchwork:</p>
+  <figure class="wide">
+    <img src="how/hayes-progress.webp" alt="Hayes Valley and the Western Addition half drawn: illustrated tiles in the middle of the darker 3D render" width="1500" height="1091" loading="lazy">
+    <figcaption>Hayes Valley and the Western Addition, partway through.</figcaption>
+  </figure>
+  <h2 id="seams">Hiding the seams</h2>
+  <p>The model draws each tile on its own, so neighboring illustrations never quite match where they overlap: a roof is a slightly different shade, a tree has moved over a couple feet, a car has changed color. Cross-fade the overlap and you get two faded copies of the same thing on top of each other, like the parked cars and storefronts on Valencia Street here:</p>
+  <figure class="wide" style="--w: min(900px, calc(100vw - 32px))">
+    <div class="ba" data-ba>
+      <img src="how/seam-after-zoom.webp" alt="Valencia Street with the overlap cut along a matching path: one copy of each car and storefront" width="900" height="596">
+      <div class="top"><img src="how/seam-before-zoom.webp" alt="Valencia Street with the overlap cross-faded: parked cars and storefronts doubled" width="900" height="596"></div>
+      <div class="bar"></div><span class="lab l">Cross-faded</span><span class="lab r">Cut</span>
+      <input type="range" min="0" max="100" value="50" aria-label="Compare cross-fading and cutting the overlap">
+    </div>
+    <figcaption>Valencia Street where two tiles overlap. Cross-faded, everything shows up twice. Cut, the seam disappears. Shoutout Rhea's Deli sandwiches on this corner!</figcaption>
+  </figure>
+  <p>In each overlap, it finds the path where the two drawings agree most, usually down the middle of a street or along a roofline, switches from one tile to the other along that path, and softens just 14 pixels on either side.</p>
+
+  <h2 id="live">Bringing it to life</h2>
+  <p>A drawing of a city is nice, but I wanted this to feel as alive as an <span class="antword">ant colony</span>. The mix of simulated car traffic and real transit and weather data makes it feel like you're watching a familiar little world. One that can also tell you when your bus is coming!</p>
+  <ul class="live">
+    <li><b>Muni</b> comes from 511.org, the Bay Area's transit data feed. Most buses and trains sit where Muni's own arrival predictions put them right now (the rest replay their last GPS reports a minute or two behind), and each one looks like the real thing: trolley poles on the electric lines, the F line's old streetcars, even the cable cars. Golden Gate Transit and AC Transit buses come from the same feed, and Caltrain from <a href="https://traini.ac/?network=bay-area" target="_blank" rel="noopener">traini.ac</a>.</li>
+    <li><b>Boats</b>, from ferries and container ships to tugs and sailboats, show up wherever their AIS transponders last reported them.</li>
+    <li><b>Planes</b> come from volunteer ADS-B receivers and are drawn by type (a 737 is the length of a 737, an A380 the length of an A380).</li>
+    <li><b>Traffic</b> is the only made-up part, and the part I'm proudest of. More on it below.</li>
+    <li><b>The quality of light</b> you see in the city matches real conditions, so the map goes <span class="lt" data-fx="gold" tabindex="0">golden at sunset</span> and the <span class="lt" data-fx="night" tabindex="0">streetlights come on after dark</span>. The <span class="lt" data-fx="fog" tabindex="0">fog comes down</span> wherever NOAA's GOES-West weather satellite last saw it. Its images are published every 10 minutes, about half an hour after they're taken, so the fog on the map is roughly 30 minutes old.</li>
+    <li><b>Every building</b> is clickable: its address, year built, height and use come from San Francisco's open data (DataSF's building footprints and the Assessor's records), plus a name wherever OpenStreetMap has one.</li>
+    <li><b>Any Muni stop</b> can become a departures board you put up on a TV or an old iPad, with BART times when there's a station nearby.</li>
+  </ul>
+  <figure class="wide">
+    <div class="trio" style="grid-template-columns: 1fr 1fr 1fr"><video src="how/live-plane.mp4" poster="how/live-plane.jpg" width="1200" height="750" autoplay muted loop playsinline aria-label="A plane flying over the bay beside a pier"></video><video src="how/live-boats.mp4?v=2" poster="how/live-boats.jpg?v=2" width="1200" height="750" autoplay muted loop playsinline aria-label="Ferries Sonoma and Gemini and the Bay Breeze moving on the bay off the Ferry Building, each labeled, with their wakes"></video><video src="how/live-train.mp4" poster="how/live-train.jpg" width="1200" height="750" autoplay muted loop playsinline aria-label="The camera riding along with a T Third train past 4th and King"></video></div>
+    <figcaption>A plane over the bay, ferries coming and going at the Ferry Building, and a T Third train past 4th and King.</figcaption>
+  </figure>
+  <figure class="wide">
+    <video src="how/fog-timelapse.mp4?v=3" poster="how/fog-timelapse.jpg?v=3" width="1080" height="676" autoplay muted loop playsinline aria-label="A time-lapse of a foggy September day over the whole city, from 10:30 am to 5 pm: fog banks cover the city in the morning, clear from the east and pull back toward the ocean"></video>
+    <figcaption>A foggy September day, replayed from the satellite's archive in ten-minute steps: the fog covers the city in the morning, then burns off from the east and pulls back toward the ocean.</figcaption>
+  </figure>
+
+  <h2 id="traffic">Simulated traffic</h2>
+  <p>There's no live feed of every car in San Francisco, so the cars are simulated. That said, they are actually simulated on the real city: all 8,673 street segments from OpenStreetMap, cut into blocks at every intersection, with the 1,562 <i>real</i> traffic lights at their real intersections.</p>
+  <figure class="wide">
+    <video src="how/traffic-dolores.mp4" poster="how/traffic-dolores.jpg" width="1440" height="900" autoplay muted loop playsinline aria-label="Simulated cars at 18th and Dolores by Dolores Park, stopping at the corner and taking turns through the intersection under the palms"></video>
+    <figcaption>18th and Dolores, by Dolores Park. Every car here is simulated: stopping at the corner, waiting its turn and driving through when it's clear.</figcaption>
+  </figure>
+  <p>Every corner and intersection runs street legally. Signals cycle green, yellow, red, with a beat of all-red before the cross street moves forward. Quiet corners are all-way stops. Side streets yield to the main road and wait for a gap in traffic. Cars keep right, follow the car in front even around a corner, slow down to turn, and when the light turns yellow they stop if they comfortably can. Nobody runs reds (though I’m considering adding some fun crime-ridden easter-eggs soon).</p>
+  <p>We also have real traffic fluctuation: a morning rush around 8, a longer evening one around 5:30, and a lull in the middle of the night. They're little 3D models in very San Francisco colors (lots of white, black and silver, the odd yellow cab, white vans, box trucks), and after dark they get headlights and taillights.</p>
+  <figure class="wide">
+    <video src="how/traffic-night.mp4" poster="how/traffic-night.jpg" autoplay muted loop playsinline aria-label="Simulated traffic on the Central Freeway at night under streetlights"></video>
+    <figcaption>The Central Freeway at night: cars on the elevated deck and on the streets underneath, under the streetlights.</figcaption>
+  </figure>
+  <p>The driving wasn’t the only complicated part; so was the map’s angle. For a while, cars on the freeway on-ramp at 13th and Mission were driving across the tops of the trees next to it. In this view, height and distance point the same way on screen: something higher up is drawn higher on the screen, but so is something farther away. So a car at the wrong height doesn't look like it's floating or sinking. It just shows up in the wrong place, on a sidewalk, out in the bay or on somebody's roof. The fix is to give every point of every street its real height, read from a depth render of the city (more on that below). Freeways sit 30 to 80 feet up, the Bay Bridge's deck climbs to over 230 feet above the water, and streets hidden between buildings get no cars at all.</p>
+  <p id="robotaxis">Some of the cars are robotaxis: Waymo's Jaguar I-Paces and newer Ojai vans, Zoox's toaster cars and Tesla's gold Cybercabs. They make up about 7% of traffic, more late at night. Click one to ride along. Then pick a destination, by clicking the map or searching for a place, and it drives there over the real one-way streets. It takes the quickest route, with a small penalty for every turn, and pulls up at the curb when it arrives.</p>
+  <figure class="wide">
+    <img src="how/robotaxi.webp" alt="A Waymo Jaguar I-Pace followed by the camera, with its card open saying it is heading to South Van Ness Avenue and its route drawn ahead of it" width="1500" height="688" loading="lazy">
+    <figcaption>Riding along with a Waymo. Its route is drawn ahead of it, ending at the pin.</figcaption>
+  </figure>
+
+  <h2>Slipping behind buildings</h2>
+  <p>Looking at the city from a bird’s-eye view top down, nothing ever blocks your view of traffic. At a 45° angle, however, almost everything does. If the vehicles can’t tell what’s in front of them, they get drawn on top of the rooflines and trees that should hide them, and that’s what makes the whole map feel fake. Early on, in an attempt to fix this, buses turning onto a side street would just blink out of existence mid-turn. That looked cheap.</p>
+  <p>The fix came from the same depth render that gives the streets their heights. For every point on the map, it records how far the camera is from whatever it sees there. Since the drawing keeps every building where the render had it, that depth lines up with the illustration too. So each bus, train and car checks its own outline against the depth, and wherever something in the drawing is closer to the camera than the vehicle, that part of the vehicle fades out of view. The result: a bus slides behind the corner of a building a few pixels at a time, and a car passes under a tree with its roof showing through the gaps in the leaves. Really high fidelity stuff.</p>
+  <p>The citywide depth grid only has a reading every 1.6 meters, which is plenty from far out and much too blocky up close (cars would vanish a whole cell early). So when you zoom in, the map loads a much finer grid for just the blocks on screen: a reading every 28 centimeters, to the nearest 5 cm. Trains are checked car by car, so the back half can be under the freeway while the front is out in the sun. Live buses and trains never vanish completely: when one is entirely behind something, it fades to a low-opacity version of itself, so you don't lose the one you're following. The subway works the same way in TV mode, where you can see the trains in the tunnel under the station right through the street.</p>
+  <figure class="wide">
+    <video src="how/trees-v2.mp4" poster="how/trees-v2.jpg" width="960" height="600" autoplay muted loop playsinline aria-label="Guerrero Street at 20th, sped up: simulated cars slide under the street trees along the curb, their roofs showing through the leaves, and come out the other side"></video>
+    <figcaption>Guerrero at 20th, at double speed. Cars slide under the street trees a bit at a time, roofs showing through the gaps in the leaves, and come out the other side.</figcaption>
+  </figure>
+
+  <h2 id="wrong">What went wrong</h2>
+  <p>Turns out a big block of empty water is too tempting for GPT Image 2. A tile that's nothing but bay water is a blank canvas, and GPT treats it like one. Hand it open water and an "isometric San Francisco" prompt and it goes wild painting half the city lol. Pure water tiles never go to the model anymore. They get a plain painted bay instead.</p>
+  <figure class="wide">
+    <img src="how/water-trio.webp" alt="Left: a tile of invented San Francisco, with the Transamerica Pyramid, Coit Tower, Lombard Street and the Bay Bridge, drawn where there should only have been water. Middle: the same tile as it is on the map now, plain painted bay. Right: a mostly-water tile by Pier 39, drawn correctly with its marina, a pier and a docked ship" width="2192" height="720" loading="lazy">
+    <figcaption>Left, what came back for a tile that should have been empty bay: a lovely drawing of a city that doesn't exist. Middle, the same tile on the map now: plain painted bay. Right, a tile by Pier 39 that's mostly water but has enough pier and marina in it to anchor the drawing, so it went to the model and came back right.</figcaption>
+  </figure>
+  <p><b>Buses on rooftops.</b> The live layers need to know how high the ground is everywhere, so alongside the drawing I render a height map of the city: one big image where each pixel records the ground height at that spot. For a while, buses were driving across roofs and through parks. The cause: the image was too big, and the browser quietly shrinks images past a certain size without saying so. So the shrunken height map no longer lines up with the drawing, allowing a bus on Castro Street to read its height from somewhere else entirely (often a rooftop or a hill). Now the height map renders in pieces small enough that the browser leaves them alone, and they get stitched back together.</p>
+  <figure class="wide">
+    <video src="how/bug-roofs.mp4" poster="how/bug-roofs.jpg" width="1280" height="720" autoplay muted loop playsinline aria-label="Muni buses driving across the rooftops on Castro Street, recreated from the original bug"></video>
+    <figcaption>The bug, recreated: Muni buses cruising across the rooftops on Castro Street while the street below sits empty.</figcaption>
+  </figure>
+  <p><b>My own model.</b> To see how close I could get on my own, I (again, really Claude) trained a style model on the drawings we already had and drew whole tiles with it on rented GPUs. It got closer than I expected! I actually felt it looked (maybe?) better than GPT Image 2 from afar, but quality loss for things like detailing on houses or more intricate illustrations like substations and chainlink fences was pretty rough.</p>
+  <figure class="wide">
+    <div class="ba" data-ba>
+      <img src="how/lora.webp" alt="The Potrero Hill blocks drawn by my own trained style model" width="1500" height="1000" loading="lazy">
+      <div class="top"><img src="how/drawn.webp" alt="The same blocks drawn by GPT Image 2" width="1500" height="1000" loading="lazy"></div>
+      <div class="bar"></div><span class="lab l">GPT Image 2</span><span class="lab r">My own model</span>
+      <input type="range" min="0" max="100" value="50" aria-label="Compare GPT Image 2 and my own model">
+    </div>
+    <figcaption>The same blocks, GPT Image 2 against my own trained model. Drag across: mine is softer, with flatter color in the trees and roofs.</figcaption>
+  </figure>
+
+  <h2 id="details">Little touches</h2>
+  <p>Open the map and it drops you down through the clouds onto the city, the same cream clouds that ring the edge of the map. <span class="simpwrap"><button type="button" class="simp" aria-label="Very Simpsons. Play the theme">Very Simpsons.</button><span class="simppip" aria-hidden="true"><video muted playsinline preload="none" src="how/simpsons.mp4"></video></span></span></p>
+  <figure class="wide">
+    <video src="how/intro.mp4" poster="how/intro.jpg" width="1280" height="720" autoplay muted loop playsinline aria-label="The opening: the camera drops through cream clouds onto the city and lands on the Ferry Building"></video>
+  </figure>
+  <p><b>Easter eggs:</b> I want to add many many more of these once the map is closer to completion, but for now Small SF has one. My friend Cody works at Meter and likes Capybaras, so naturally he is holding one outside of Meter HQ. Claude's code-drawn Cody sucked so I had GPT make a sprite that Claude could animate to make him wave.</p>
+  <figure class="wide">
+    <div class="trio"><img src="how/cody-v1.webp" alt="The first Cody, drawn in code: a simple figure in a green SOLO cap" loading="lazy"><img src="how/cody-sprite.webp" alt="Cody's sprite sheet: four frames of him waving and holding a capybara" loading="lazy"><video src="how/cody.mp4" poster="how/cody.jpg" autoplay muted loop playsinline aria-label="Cody on the map outside Meter, waving"></video></div>
+    <figcaption>Cody, version one (left), his sprite sheet, and Cody on the map today, waving.</figcaption>
+  </figure>
+
+  <h2 id="next">What's next</h2>
+  <p>More than two fifths of the city is drawn so far, from the Embarcadero out through SoMa, the Mission, Bernal Heights, Noe Valley, the Castro, Hayes Valley and the Haight, up over Twin Peaks to Glen Park, and north through North Beach, Russian Hill, Pacific Heights and the Marina to the Presidio and Crissy Field. The rest of the map is still the 3D render, waiting its turn. Fisherman's Wharf, Golden Gate Park, the Sunset, the Richmond and everything else are coming, one neighborhood at a time. The project isn't open source currently, but I'd love help: API credits to pay for the drawing, or time, whether that's reporting bugs, testing it on your phone, or spotting what I got wrong about your block.</p>
+  <p>What surprised me most is where the hard parts turned out to be. Drawing the city was the easy bit. The hard part was then making the map feel alive. How high the freeway is, what's in front of a bus, why a tile of empty bay turns into a whole imaginary city, etc. Solving those is what turned a pretty map into the micro-civilization I was after: 1,322 drawn tiles, hundreds of real buses, trains and boats, and a few hundred made-up drivers stopping at 1,562 real red lights. 1,603 tiles to go!</p>
+  <p>Got an idea, a bug, or a spot you want drawn next? <a href="mailto:smallsf@dutilh.net">Email me</a>.</p>
+
+  <div class="fund">
+    <h3>Help draw the rest of the city</h3>
+    <p>Every new neighborhood is a few hundred tiles, and every tile is an image-model call I pay for out of pocket. If you'd like to see your corner of San Francisco drawn sooner, chipping in for credits genuinely speeds things up. Any amount helps, and I'll put your neighborhood near the top of the list.</p>
+    <div class="btns"><a class="primary" href="https://venmo.com/u/dutilh" target="_blank" rel="noopener">Venmo @dutilh</a><a href="mailto:smallsf@dutilh.net?subject=API%20credits%20for%20Small%20SF">Email me about API credits</a></div>
+  </div>
+  <p class="aside">What's new on the map is under <a href="about#changes" data-tab="changes">Changes</a>, and the data and people behind it under <a href="about#credits" data-tab="credits">Thanks</a>.</p>
+  </section>
+
+  <section class="panel" id="tab-changes" role="tabpanel" aria-labelledby="t-changes">
+    <div class="kicker">Changes</div>
+    <h1>What's new on the map</h1>
+    <p class="dek">Newest first. Anything with a Try it link opens the map right on it.</p>
+    <div class="days">
+      <article class="day"><div class="when"><b>Nov 22</b><span>Sunday</span></div><div class="what"><ul class="live"><li>Smoother on slower laptops and phones: less drawing while the map holds still, and traffic thins sooner when a device is struggling</li><li>Planes stay on the map when the flight-tracking feeds get busy</li></ul></div></article>
+      <article class="day"><div class="when"><b>Nov 21</b><span>Saturday</span></div><div class="what"><div class="shots"><a class="shot" href="./?at=37.8030,-122.4420,1000m"><img src="how/log-marina.webp" width="960" height="504" alt="The Marina, Marina Green and the Palace of Fine Arts, drawn" loading="lazy"><span>The Marina</span></a><a class="shot" href="./?at=37.7915,-122.4330,900m"><img src="how/log-pacheights.webp" width="960" height="504" alt="Pacific Heights with Lafayette and Alta Plaza parks, drawn" loading="lazy"><span>Pacific Heights</span></a><a class="shot" href="./?at=37.7978,-122.4585,1100m"><img src="how/log-presidio.webp" width="960" height="504" alt="The Presidio's Main Post, with its brick barracks and parade lawns, drawn" loading="lazy"><span>The Presidio</span></a><a class="shot" href="./?at=37.8020,-122.4085,800m"><img src="how/log-northbeach.webp" width="960" height="504" alt="Telegraph Hill and Coit Tower over North Beach, drawn" loading="lazy"><span>North Beach</span></a><a class="shot" href="./?at=37.7510,-122.4470,1100m"><img src="how/log-twinpeaks.webp" width="960" height="504" alt="Twin Peaks and Sutro Tower, drawn" loading="lazy"><span>Twin Peaks</span></a><a class="shot" href="./?at=37.8000,-122.4190,800m"><img src="how/log-russianhill.webp" width="960" height="504" alt="Russian Hill and the crooked block of Lombard Street, drawn" loading="lazy"><span>Russian Hill</span></a></div><ul class="live"><li>Pacific Heights, Laurel Heights and Presidio Heights, drawn <a class="try" href="./?at=37.7911,-122.4377,600m">See Alta Plaza →</a></li><li>The Marina, Cow Hollow, Fort Mason, Aquatic Park and the Palace of Fine Arts, out to the Presidio's main post <a class="try" href="./?at=37.8029,-122.4484,600m">See the Palace →</a></li><li>New landmarks: Palace of Fine Arts, Fort Mason, Marina Green, Ghirardelli Square, Aquatic Park, Lafayette Park, Alta Plaza Park and the Presidio Main Post</li><li>Cars hide behind buildings and trees all over the new parts of the map</li><li>Bernal Heights, from the top of Bernal Hill down to Precita Park and Holly Park, drawn <a class="try" href="./?at=37.7430,-122.4144,800m">See Bernal Hill →</a></li><li>The Presidio and Crissy Field: Mountain Lake, the golf course, the forest and the beach and marsh along the bay <a class="try" href="./?at=37.7990,-122.4630,1400m">See the Presidio →</a></li><li>New landmarks: Bernal Heights Park, Precita Park, Mountain Lake, the Presidio Golf Course and Crissy Field</li><li>Streets, traffic and Muni out to the Presidio</li><li>The Inner Richmond from Golden Gate Park's de Young corner to Rossi Playground, USF and St. Ignatius on Lone Mountain, drawn <a class="try" href="./?at=37.7765,-122.4610,1000m">See the Inner Richmond →</a></li><li>Fixed buses and cars drifting off the streets downtown, after a 3D render came back with holes, and a 14 that drove across the Audiffred Building's roof</li><li>Redrew a tile in the Presidio forest that came back as a made-up village</li><li>A rewrite of the About page, with a map of how the drawing has grown, robotaxis, and what the live layers look like</li><li>North Beach, Telegraph Hill and the piers up to Pier 39, drawn <a class="try" href="./?at=37.8087,-122.4098,600m">See Pier 39 →</a></li><li>Russian Hill, Lombard Street's crooked block, Polk Gulch and Van Ness <a class="try" href="./?at=37.8021,-122.4187,400m">See Lombard →</a></li><li>Twin Peaks, Sutro Tower, Diamond Heights, Glen Canyon and Glen Park, drawn, with Muni and traffic out to Glen Park</li><li>New landmarks: Coit Tower, Lombard Street, Pier 39, Washington Square, Twin Peaks, Sutro Tower (with its live camera) and Glen Canyon</li><li>Traffic shows up sooner when the map opens, and stays full on slower computers</li><li>Fog thins as you zoom in, so foggy neighborhoods stay readable</li><li>Buses waiting at the start of their route sit on the street, not the sidewalk</li><li>Robotaxis on the streets: Waymos, Zoox and Tesla Cybercabs. Click one to ride along, then pick where it goes <a class="try" href="./?time=2026-11-20T02:30">See 2:30am →</a></li><li>More cars late at night, and more of them robotaxis</li><li>Lists get notes for each place, a "by" line, and the next Muni near each place <a class="try" href="./?list=Mission+coffee&amp;by=Ari&amp;p=37.76417,-122.42290,Ritual+Coffee~get+the+cortado&amp;p=37.76150,-122.42460,Tartine&amp;p=37.75980,-122.41420,Philz&amp;at=37.7625,-122.4185,1300m">See a list →</a></li><li>Fireworks over the ballpark when the Giants hit a home run, with kayaks in McCovey Cove for splash hits <a class="try" href="./?homerun=1&amp;at=37.7786,-122.3893,900m">Try it →</a></li><li>Fourth of July and New Year's fireworks <a class="try" href="./?event=july4&amp;at=37.8085,-122.4160,2000m">Try it →</a>, and the Blue Angels during Fleet Week <a class="try" href="./?event=fleetweek">Try it →</a></li><li>Foghorns at the Golden Gate when the fog is in (turn sound on with the speaker button) <a class="try" href="./?foghorn=1&amp;weather=fog">Hear it →</a></li><li>TV boards for BART stations, with a QR code that opens the stop on your phone <a class="try" href="./?tv=16992">Try it →</a></li><li>Buses and trains slip behind buildings properly, and you can see the subway through the streets in TV mode <a class="try" href="./?tv=15728">Try it →</a></li><li>Click a bus or train to center on it</li><li>A Share button, and this About page</li><li>Boats show up within a minute of arriving, including ships heading out past the Golden Gate</li></ul></div></article>
+      <article class="day"><div class="when"><b>Nov 15</b><span>Sunday</span></div><div class="what"><div class="shots"><a class="shot" href="./?at=37.7700,-122.4469,750m"><img src="how/log-haight.webp" width="960" height="504" alt="The drawn Haight, with the edge of Buena Vista Park" loading="lazy"><span>Haight-Ashbury</span></a><a class="shot" href="./?at=37.7762,-122.4330,750m"><img src="how/log-hayes.webp" width="960" height="504" alt="Alamo Square and the Western Addition, drawn" loading="lazy"><span>Alamo Square</span></a><a class="shot" href="./?at=37.7605,-122.3925,850m"><img src="how/log-potrero.webp" width="960" height="504" alt="Potrero Hill and the 280 freeway, drawn" loading="lazy"><span>Potrero Hill</span></a></div><ul class="live"><li>Lists of your own places, shared as a link: Places &gt; Make a list</li><li>TV mode: a big departures board for any Muni stop, with the map around it (open a stop, then Show on a TV) <a class="try" href="./?tv=15731">Try it →</a></li><li>Buses and trains wait at the end of the line until they're due out</li><li>Haight-Ashbury, Cole Valley and the Panhandle drawn</li><li>Hayes Valley, the Western Addition and Alamo Square drawn</li><li>Smoother joins between drawn pieces</li><li>Shared links show a picture of the view they open on</li><li>Fog drawn where the weather satellite actually sees it, and which neighborhoods are in it <a class="try" href="./?weather=fog">Try it →</a></li><li>Potrero Hill, Dogpatch and Pier 70 drawn</li><li>Live planes overhead, drawn by aircraft type</li><li>Muni placed by live arrival predictions; click a stop for its arrivals</li><li>Caltrain with live delays from traini.ac <a class="try" href="./?at=37.7765,-122.3945,700m">See 4th &amp; King →</a></li><li>Buses, trains and streetcars drawn like the real ones; click one to follow it</li><li>New look, in the style of dutilh.net</li></ul></div></article>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-credits" role="tabpanel" aria-labelledby="t-credits">
+    <div class="kicker">Thanks</div>
+    <h1>What the map is made of</h1>
+    <p class="dek">The data, the tools and the people behind it. Want to support it? <a href="about#support" data-tab="support">Chip in</a>.</p>
+    <div class="cards">
+      <div class="card"><span class="k">3D imagery</span><b><a href="https://developers.google.com/maps/documentation/tile" target="_blank" rel="noopener">Google 3D Tiles</a></b><p>Photorealistic 3D Tiles, the scans behind Google Earth. Map data ©Google</p><span class="now">2,925 tiles rendered from it</span></div>
+      <div class="card"><span class="k">Drawings</span><b>GPT Image 2 <small>&amp;</small> <a href="https://higgsfield.ai" target="_blank" rel="noopener">Higgsfield</a></b><p>OpenAI's image model redraws each render as an illustration</p><span class="now">1,322 tiles drawn so far</span></div>
+      <div class="card"><span class="k">Muni</span><b><a href="https://511.org/open-data" target="_blank" rel="noopener">511.org</a></b><p>Live Muni, Golden Gate Transit and AC Transit, placed by arrival predictions</p><span class="now live" data-live="transit">Buses and trains on the map now</span></div>
+      <div class="card"><span class="k">Caltrain</span><b><a href="https://traini.ac/?network=bay-area" target="_blank" rel="noopener">traini.ac</a></b><p>Live positions and delays (data provided by 511.org)</p><span class="now live" data-live="caltrain">Caltrain right now</span></div>
+      <div class="card"><span class="k">BART</span><b><a href="https://api.bart.gov" target="_blank" rel="noopener">api.bart.gov</a></b><p>Departures on the station TV boards</p><span class="now">Live at every downtown station</span></div>
+      <div class="card"><span class="k">Boats</span><b><a href="https://aisstream.io" target="_blank" rel="noopener">aisstream.io</a></b><p>Ship transponders (AIS) around the bay</p><span class="now live" data-live="boats">Boats on the bay now</span></div>
+      <div class="card"><span class="k">Planes</span><b><a href="https://adsb.fi" target="_blank" rel="noopener">adsb.fi</a></b><p>ADS-B open data, drawn by aircraft type</p><span class="now live" data-live="planes">Planes overhead now</span></div>
+      <div class="card"><span class="k">Weather</span><b><a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></b><p>Sets the light, clouds, rain and wind</p><span class="now live" data-live="weather">Weather by the Ferry Building now</span></div>
+      <div class="card"><span class="k">Fog</span><b>NOAA GOES-West</b><p>Low cloud from the satellite, via <a href="https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api" target="_blank" rel="noopener">NASA GIBS</a></p><span class="now live" data-live="fog">The latest satellite pass</span></div>
+      <div class="card"><span class="k">Streets</span><b><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></b><p>Every street, lane and signal the traffic drives on. © OpenStreetMap contributors</p><span class="now">683 km of streets, 1,396 signals</span></div>
+      <div class="card"><span class="k">Buildings</span><b><a href="https://data.sf.gov" target="_blank" rel="noopener">DataSF</a></b><p>What each building is, when it was built and how tall</p><span class="now">188,139 buildings</span></div>
+      <div class="card"><span class="k">Search</span><b><a href="https://nominatim.org" target="_blank" rel="noopener">Nominatim</a></b><p>Finding places by name</p><span class="now">OpenStreetMap's own search</span></div>
+      <div class="card"><span class="k">Viewer</span><b><a href="https://openseadragon.github.io" target="_blank" rel="noopener">OpenSeadragon</a></b><p>Drags and zooms the whole drawing in the browser</p><span class="now">79,200 × 78,480 pixels</span></div>
+      <div class="card"><span class="k">Inspired by</span><b><a href="https://isometricseattle.fun" target="_blank" rel="noopener">isometricseattle.fun</a></b><p>The Seattle map I couldn't stop playing with</p><span class="now">Where the idea came from</span></div>
+      <div class="card"><span class="k">Thank you, donors</span><b><a href="https://neb.bio/" target="_blank" rel="noopener">Adarsh</a></b><p>Funded the drawing of the Tenderloin, Civic Center, Nob Hill and lower Polk</p><span class="now">Want your name here? <a href="about#support" data-tab="support">Chip in</a></span></div>
+    </div>
+    <p class="readers">Thanks to <a href="https://x.com/mcmgoodall" target="_blank" rel="noopener">Kai</a>, <a href="https://x.com/notcnrad" target="_blank" rel="noopener">Conrad</a>, <a href="https://x.com/alistaiir" target="_blank" rel="noopener">Alistair</a> and <a href="https://x.com/1afond" target="_blank" rel="noopener">Jack</a> for reading drafts of the launch tweet and about page.</p>
+  </section>
+
+  <section class="panel" id="tab-support" role="tabpanel" aria-labelledby="t-support">
+    <div class="kicker">Support</div>
+  <div class="fund" id="help">
+    <h3>Help draw the rest of the city</h3>
+    <p>Every new neighborhood is a few hundred tiles, and every tile is an image-model call I pay for out of pocket. If you'd like to see your corner of San Francisco drawn sooner, chipping in for credits genuinely speeds things up. Any amount helps, and I'll put your neighborhood near the top of the list.</p>
+    <div class="btns"><a class="primary" href="https://venmo.com/u/dutilh" target="_blank" rel="noopener">Venmo @dutilh</a><a href="mailto:smallsf@dutilh.net?subject=API%20credits%20for%20Small%20SF">Email me about API credits</a></div>
+  </div>
+  </section>
+</main>
+<script>
+  // before/after sliders: the range input sets how much of the top (left-hand) image shows
+  // "Very Simpsons.": the theme's first few seconds, with the opening titles in a little picture-in-picture beside it
+  (() => {
+    const b = document.querySelector("button.simp"); if (!b) return;
+    const pip = document.querySelector(".simppip"), v = pip && pip.querySelector("video");
+    let a = null, hideT = null;
+    const stop = () => { try { a && a.pause(); v && v.pause(); } catch {} pip && pip.classList.remove("on"); };
+    b.addEventListener("click", () => {
+      try {
+        if (!a) { a = new Audio("how/simpsons.m4a"); a.volume = 0.8; a.addEventListener("ended", () => { clearTimeout(hideT); hideT = setTimeout(() => pip && pip.classList.remove("on"), 400); }); }
+        if (!a.paused) { stop(); return; }
+        clearTimeout(hideT); a.currentTime = 0; if (v) v.currentTime = 0;
+        pip && pip.classList.add("on");
+        a.play().catch(() => {}); v && v.play().catch(() => {});
+      } catch {}
+      window.track?.("how: simpsons");
+    });
+    document.addEventListener("how:tab", (e) => { if (e.detail.tab !== "story") { clearTimeout(hideT); stop(); } });   // off to another tab: the theme stops
+  })();
+  // the live count: what the map is showing this minute (same feeds as the map)
+  (async () => {
+    try {
+      const get = (u) => fetch(u).then((r) => r.json()).catch(() => null);
+      const [v, b, p] = await Promise.all([get("api/vehicles"), get("api/boats"), get("api/planes")]);
+      const n = (v ? Object.keys(v.vehicles || {}).length : 0) + (b ? Object.keys(b.ships || {}).length : 0) + (p ? (p.ac || []).length : 0);
+      if (n > 0) document.getElementById("livecount").textContent = n.toLocaleString();
+    } catch {}
+  })();
+  // analytics: how far people read, which sliders they drag, donate and map clicks
+  (() => {
+    const marks = [25, 50, 75, 100], hit = new Set();
+    addEventListener("scroll", () => {
+      if (window.__howTab && window.__howTab !== "story") return;   // reading depth is about the Story tab
+      const pct = (scrollY + innerHeight) / document.body.scrollHeight * 100;
+      for (const m of marks) if (pct >= m && !hit.has(m)) { hit.add(m); window.track?.("how: read " + m + "%"); }
+    }, { passive: true });
+    document.querySelectorAll("[data-ba] input").forEach((r, i) => r.addEventListener("change", () => window.track?.("how: slider", { which: r.getAttribute("aria-label") }), { once: true }));
+    document.querySelectorAll(".fund a").forEach((a) => a.addEventListener("click", () => window.track?.("how: donate", { via: a.textContent.trim() })));
+    document.querySelectorAll('a[href="./"]').forEach((a) => a.addEventListener("click", () => window.track?.("how: open map")));
+    const h2s = [...document.querySelectorAll("#tab-story h2")], seenH = new Set();
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting && !seenH.has(e.target)) { seenH.add(e.target); window.track?.("how: section", { name: e.target.textContent.trim() }); } }), { threshold: 1 });
+    h2s.forEach((h) => io.observe(h));
+  })();
+  document.querySelectorAll("[data-ba]").forEach((ba) => {
+    const top = ba.querySelector(".top"), bar = ba.querySelector(".bar"), r = ba.querySelector("input");
+    const set = () => { top.style.clipPath = `inset(0 ${100 - r.value}% 0 0)`; bar.style.left = r.value + "%"; };
+    r.addEventListener("input", set); set();
+  });
+</script>
+<nav class="rail" aria-label="Chapters"></nav>
+<button class="totop" type="button" aria-label="Back to top" title="Back to top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+<button class="snd" type="button" aria-pressed="false" aria-label="Mute interaction sounds" title="Sounds on">
+  <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+  <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
+</button>
+<script>
+  // Interaction sounds, ported from dutilh.net (components/Sound.tsx): synthesized with the
+  // Web Audio API, no audio files. A tick when hovering links and buttons, a soft note that
+  // follows the before/after sliders, a click when grabbing and letting go of a slider, and a
+  // toggle for the mute button. On by default like dutilh.net; silent until the first real
+  // gesture (browsers require it). Never throws.
+  (() => {
+    const RECIPES = {
+      tick: { gain: 0.2, layers: [
+        { kind: "noise", filter: "bandpass", freq: 4200, q: 1.4, attack: 0.001, decay: 0.018, peak: 0.1 },
+        { kind: "tone", wave: "sine", freq: 2200, attack: 0.001, decay: 0.012, peak: 0.012 } ] },
+      press: { gain: 0.4, layers: [
+        { kind: "noise", filter: "bandpass", freq: 1600, q: 1.3, attack: 0.001, decay: 0.022, peak: 0.13 } ] },
+      release: { gain: 0.4, layers: [
+        { kind: "noise", filter: "bandpass", freq: 4500, q: 1.7, attack: 0.001, decay: 0.017, peak: 0.12 },
+        { kind: "tone", wave: "sine", freq: 3100, offset: 0.006, attack: 0.001, decay: 0.05, peak: 0.02 } ] },
+      toggle: { gain: 0.25, layers: [
+        { kind: "noise", filter: "bandpass", freq: 2100, q: 1.5, attack: 0.001, decay: 0.017, peak: 0.12 },
+        { kind: "noise", filter: "bandpass", freq: 3900, q: 1.5, offset: 0.026, attack: 0.001, decay: 0.02, peak: 0.1 } ] },
+      note: { gain: 0.2, layers: [
+        { kind: "tone", wave: "sine", freq: 520, attack: 0.003, decay: 0.11, peak: 0.05 },
+        { kind: "tone", wave: "sine", freq: 1040, attack: 0.003, decay: 0.05, peak: 0.008 } ] },
+    };
+    const KEY = "sf-how-sound", MASTER = 1.5;
+    let muted = false, activated = false, ctx = null, noise = null;
+    try { muted = localStorage.getItem(KEY) === "off"; } catch (e) {}
+
+    const getCtx = () => {
+      if (ctx) return ctx;
+      try { const AC = window.AudioContext || window.webkitAudioContext; if (AC) ctx = new AC(); } catch (e) { ctx = null; }
+      return ctx;
+    };
+    const getNoise = (c) => {
+      if (noise) return noise;
+      const len = Math.floor(c.sampleRate * 0.3);
+      noise = c.createBuffer(1, len, c.sampleRate);
+      const d = noise.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      return noise;
+    };
+    const synth = (c, r, pitch) => {
+      const t0 = c.currentTime + 0.005, master = c.createGain();
+      master.gain.value = r.gain * MASTER;
+      master.connect(c.destination);
+      for (const l of r.layers) {
+        const start = t0 + (l.offset || 0), end = start + l.attack + l.decay, env = c.createGain();
+        env.gain.setValueAtTime(0.0001, start);
+        env.gain.linearRampToValueAtTime(l.peak, start + l.attack);
+        env.gain.exponentialRampToValueAtTime(0.0001, end);
+        env.connect(master);
+        if (l.kind === "noise") {
+          const src = c.createBufferSource(), f = c.createBiquadFilter();
+          src.buffer = getNoise(c); f.type = l.filter; f.frequency.value = l.freq; f.Q.value = l.q || 1;
+          src.connect(f); f.connect(env); src.start(start); src.stop(end + 0.02);
+        } else {
+          const o = c.createOscillator();
+          o.type = l.wave; o.frequency.setValueAtTime(l.freq * pitch, start);
+          o.connect(env); o.start(start); o.stop(end + 0.02);
+        }
+      }
+    };
+    const play = (name, pitch = 1, force = false) => {
+      if ((muted && !force) || !activated) return;
+      const r = RECIPES[name], c = r && getCtx();
+      if (!c) return;
+      try {
+        if (c.state === "running") synth(c, r, pitch);
+        else c.resume().then(() => { try { synth(c, r, pitch); } catch (e) {} }).catch(() => {});
+      } catch (e) {}
+    };
+    const activate = () => {
+      activated = true;
+      try { const c = getCtx(); if (c && c.state !== "running") c.resume().catch(() => {}); } catch (e) {}
+    };
+    addEventListener("pointerdown", activate, true);
+    addEventListener("touchstart", activate, { capture: true, passive: true });
+    addEventListener("keydown", activate, true);
+    window.__howSound = play;   // for the live text below
+
+    // hover ticks on links and buttons (sliders get their own sound below)
+    let lastHover = null;
+    document.addEventListener("mouseover", (e) => {
+      const t = e.target instanceof Element ? e.target.closest("a, button, summary") : null;
+      if (!t || t === lastHover) return;
+      lastHover = t;
+      play("tick");
+    }, true);
+    document.addEventListener("mouseout", (e) => {
+      if (lastHover && !lastHover.contains(e.relatedTarget)) lastHover = null;
+    }, true);
+
+    // before/after sliders: a click on grab and release, and a soft note while dragging
+    // whose pitch follows the slider's position, throttled so a fast drag doesn't machine-gun
+    document.querySelectorAll("[data-ba] input").forEach((r) => {
+      let last = 0, lastV = +r.value, down = false;
+      r.addEventListener("pointerdown", () => { down = true; activate(); play("press"); });
+      const up = () => { if (down) { down = false; play("release"); } };
+      r.addEventListener("pointerup", up);
+      r.addEventListener("pointercancel", up);
+      r.addEventListener("input", () => {
+        const v = +r.value, now = performance.now();
+        if (now - last < 45 || Math.abs(v - lastV) < 2) return;
+        last = now; lastV = v;
+        play("note", 0.75 + (v / 100) * 0.75);
+      });
+    });
+
+    // the mute switch
+    const btn = document.querySelector(".snd");
+    const render = () => {
+      if (!btn) return;
+      btn.setAttribute("aria-pressed", String(muted));
+      btn.setAttribute("aria-label", muted ? "Unmute interaction sounds" : "Mute interaction sounds");
+      btn.title = muted ? "Sounds off" : "Sounds on";
+    };
+    if (btn) btn.addEventListener("click", () => {
+      activate();
+      play("toggle", 1, true);
+      muted = !muted;
+      try { localStorage.setItem(KEY, muted ? "off" : "on"); } catch (e) {}
+      window.track?.("how: sound", { muted });
+      render();
+    });
+    render();
+  })();
+</script>
+<script>
+  // Live text: "golden at sunset", "streetlights come on after dark" and "fog comes down" (under "Making it live")
+  // do what they say on hover, keyboard focus or tap: a golden-hour wash over the page, dusk with a row of
+  // streetlights flicking on, fog rolling in over the page. Each holds while you hover and clears when you leave.
+  (() => {
+    const els = [...document.querySelectorAll(".lt[data-fx]")]; if (!els.length) return;
+    const root = document.documentElement, seen = new Set();
+    const make = (cls, parent = document.body, tag = "div") => {
+      const n = document.createElement(tag); n.className = cls; n.setAttribute("aria-hidden", "true"); parent.appendChild(n); return n;
+    };
+    ["fxw gold m", "fxw gold s", "fxw night m", "fxw night s"].forEach((c) => make(c));
+    // the fog: a canvas over the whole page with soft fog banks drifting across it over a cool grey haze, thinner around the
+    // paragraph so it stays readable. It rolls in while "fog comes down" is hovered (or focused, or tapped) and clears when you leave
+    const fogEl = make("fogsky"), cv = fogEl.appendChild(document.createElement("canvas")), cx = cv.getContext("2d");
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let fogOn = false, fogA = 0, fogRaf = 0, fogLast = 0, fogLi = null, banks = [];
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    // a fog bank: dozens of overlapping soft blobs, wider than tall, drawn once onto its own canvas
+    const sprite = (w, h) => {
+      const c = document.createElement("canvas"); c.width = w; c.height = h; const g = c.getContext("2d");
+      for (let i = 0; i < 30; i++) {
+        const x = w * (0.12 + rnd() * 0.76), y = h * (0.3 + rnd() * 0.45) - Math.sin((x / w) * Math.PI) * h * 0.12, r = h * (0.16 + rnd() * 0.3);
+        const gr = g.createRadialGradient(x, y, 0, x, y, r);
+        gr.addColorStop(0, "rgba(246,248,249,.6)"); gr.addColorStop(0.45, "rgba(238,241,243,.34)"); gr.addColorStop(1, "rgba(236,239,241,0)");
+        g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+      }
+      return c;
+    };
+    const shapes = [sprite(640, 300), sprite(560, 260), sprite(720, 320), sprite(480, 240)];
+    const seedBanks = () => {
+      const W = innerWidth, H = innerHeight; banks = [];
+      for (let i = 0; i < 11; i++) { const k = 0.8 + rnd() * 1.5; banks.push({ img: shapes[i % shapes.length], k, x: rnd() * (W + 600) - 600, y: rnd() * (H + 160) - 220, v: 14 + rnd() * 26, b: rnd() * 6.28 }); }
+    };
+    const drawFog = (t) => {
+      const W = innerWidth, H = innerHeight, dt = fogLast ? Math.min(0.05, (t - fogLast) / 1000) : 0; fogLast = t;
+      if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+      fogA += ((fogOn ? 1 : 0) - fogA) * (1 - Math.exp(-dt / (fogOn ? 0.45 : 0.3)));
+      cx.globalCompositeOperation = "source-over"; cx.clearRect(0, 0, W, H);
+      if (fogA < 0.004 && !fogOn) { fogA = 0; fogRaf = 0; fogLast = 0; fogEl.style.opacity = 0; return; }
+      fogEl.style.opacity = 1;
+      // the haze: the warm page goes cool and grey
+      cx.globalAlpha = fogA; cx.fillStyle = "rgba(190,198,206,.34)"; cx.fillRect(0, 0, W, H);
+      // the banks, drifting right (rolling in off the ocean), bobbing a little, wrapping round
+      for (const f of banks) {
+        if (!still) { f.x += f.v * dt; f.b += dt * 0.4; if (f.x > W + 40) f.x = -f.img.width * f.k - 40; }
+        const w = f.img.width * f.k, h = f.img.height * f.k;
+        cx.globalAlpha = fogA * 0.95; cx.drawImage(f.img, f.x, f.y + Math.sin(f.b) * 6, w, h);
+      }
+      // thinner over the paragraph, so it reads through the fog
+      if (fogLi) {
+        const r = fogLi.getBoundingClientRect(), mx = r.left + r.width / 2, my = r.top + r.height / 2, R = Math.max(r.width, r.height) * 0.62;
+        cx.globalCompositeOperation = "destination-out"; cx.globalAlpha = 0.8;
+        cx.save(); cx.translate(mx, my); cx.scale(1, Math.max(0.35, r.height / r.width) + 0.15);
+        const g = cx.createRadialGradient(0, 0, R * 0.25, 0, 0, R); g.addColorStop(0, "#000"); g.addColorStop(1, "rgba(0,0,0,0)");
+        cx.fillStyle = g; cx.beginPath(); cx.arc(0, 0, R, 0, Math.PI * 2); cx.fill(); cx.restore();
+      }
+      cx.globalAlpha = 1; cx.globalCompositeOperation = "source-over";
+      fogRaf = requestAnimationFrame(drawFog);
+    };
+    const fogStart = (el) => { fogLi = el.closest("li") || el.parentNode; if (!banks.length) seedBanks(); fogOn = true; if (!fogRaf) fogRaf = requestAnimationFrame(drawFog); };
+    const fogStop = () => { fogOn = false; if (!fogRaf && fogA > 0) fogRaf = requestAnimationFrame(drawFog); };
+    addEventListener("resize", () => { if (banks.length) seedBanks(); });
+    const lamps = make("lamps");
+    [[4, 22], [14, 40], [25, 26], [36, 46], [47, 30], [58, 48], [69, 28], [80, 44], [90, 24]].forEach(([x, y], i) => {
+      make("lamp", lamps, "span").style.cssText = `left:${x}%;bottom:${y}px;--i:${i}`;
+    });
+    let cur = "", lastPtr = 0;
+    const on = (el) => {
+      const fx = el.dataset.fx;
+      if (!seen.has(fx)) { seen.add(fx); window.track?.("how: live text", { effect: fx }); }
+      if (fx === "fog") { if (!fogOn) window.__howSound?.("note", 0.6); el.classList.add("on"); fogStart(el); return; }
+      if (cur === fx) return;
+      els.forEach((e) => e.classList.toggle("on", e === el));
+      cur = fx; root.dataset.fx = fx;
+      window.__howSound?.("note", fx === "gold" ? 1.26 : 0.84);
+    };
+    const off = (el) => {
+      if (el.dataset.fx === "fog") { el.classList.remove("on"); fogStop(); return; }
+      if (el.dataset.fx !== cur) return;
+      el.classList.remove("on"); cur = ""; delete root.dataset.fx;
+    };
+    els.forEach((el) => {
+      let touchT = 0;
+      el.addEventListener("pointerdown", (e) => {
+        lastPtr = performance.now();
+        if (e.pointerType === "mouse") return;
+        on(el); clearTimeout(touchT); touchT = setTimeout(() => off(el), 3600);   // a tap: hold the light a moment, then let it go
+      });
+      el.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" || e.pointerType === "pen") on(el); });
+      el.addEventListener("pointerleave", (e) => { if ((e.pointerType === "mouse" || e.pointerType === "pen") && !el._kb) off(el); });
+      el.addEventListener("focus", () => { if (performance.now() - lastPtr > 600) { el._kb = true; on(el); } });
+      el.addEventListener("blur", () => { el._kb = false; off(el); });
+      el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); on(el); } });
+    });
+    document.addEventListener("how:tab", (e) => { if (e.detail.tab !== "story") els.forEach(off); });   // off to another tab: the light and fog go too
+  })();
+</script>
+<script>
+  // Tabs: Story (the default), Changes, Credits and Support, one address each (#changes, #credits, #support; #help opens
+  // Support at the donate box). A click swaps the tab and updates the address without jumping the page; back and forward
+  // switch tabs. The looping videos play only while they're on screen in the open tab (paused in hidden tabs, and off screen).
+  (() => {
+    const root = document.documentElement, nav = document.querySelector(".tabs"); if (!nav) return;
+    const TABS = ["story", "changes", "credits", "support"], ALIAS = { help: "support" };
+    const links = [...nav.querySelectorAll("[data-tab]")], panels = [...document.querySelectorAll(".panel")];
+    const hashName = () => { try { return decodeURIComponent(location.hash.slice(1)).toLowerCase(); } catch { return ""; } };
+    const fromHash = () => { const h = hashName(); return TABS.includes(h) ? h : ALIAS[h] || "story"; };
+    const pos = {};   // where each tab was scrolled to, for back and forward
+    let cur = null;
+    // where the tab line sits: under the launch video on the Story, under the dek on the others
+    const place = (tab) => { const at = tab === "story" ? document.querySelector("#tab-story figure.wide") : (document.querySelector("#tab-" + tab + " .dek") || document.querySelector("#tab-" + tab + " .kicker")); if (!at) return; if (tab === "story") at.appendChild(nav); else at.after(nav); };
+    // a new tab starts at the top of the page
+    const contentTop = () => 0;
+    function show(tab, first) {
+      if (cur && !first) pos[cur] = scrollY;
+      cur = tab; window.__howTab = tab; root.dataset.tab = tab; place(tab);
+      links.forEach((a) => { const on = a.dataset.tab === tab; a.setAttribute("aria-selected", String(on)); a.tabIndex = on ? 0 : -1; });
+      const ae = document.activeElement;
+      if (ae && ae.closest && ae.closest(".panel") && ae.closest(".panel").id !== "tab-" + tab) ae.blur();
+      for (const p of panels) if (p.id !== "tab-" + tab) p.querySelectorAll("video").forEach((v) => { if (!v.paused) v.pause(); });
+      document.dispatchEvent(new CustomEvent("how:tab", { detail: { tab } }));
+    }
+    function go(tab) {
+      if (tab === cur) { if (scrollY > contentTop()) scrollTo(0, contentTop()); return; }
+      history.pushState({ tab }, "", location.pathname + location.search + (tab === "story" ? "" : "#" + tab));
+      show(tab);
+      if (scrollY > contentTop()) scrollTo(0, contentTop());
+      window.__howSound?.("release");
+      window.track?.("about: tab", { tab });
+    }
+    // tab links (and the links to a tab in the text): open in place; a modified click still opens a new browser tab
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest && e.target.closest("a[data-tab]");
+      if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault(); go(a.dataset.tab);
+    });
+    // arrow keys move along the tab row, as tab rows do
+    nav.addEventListener("keydown", (e) => {
+      const i = links.indexOf(document.activeElement); if (i < 0) return;
+      const j = e.key === "ArrowRight" ? (i + 1) % links.length : e.key === "ArrowLeft" ? (i + links.length - 1) % links.length : e.key === "Home" ? 0 : e.key === "End" ? links.length - 1 : -1;
+      if (j < 0) return;
+      e.preventDefault(); links[j].focus(); go(links[j].dataset.tab);
+    });
+    // back and forward, or an address typed with a new #tab
+    const follow = () => {
+      const tab = fromHash();
+      if (tab === cur) { if (hashName() === "help") document.getElementById("help")?.scrollIntoView(); return; }
+      show(tab);
+      requestAnimationFrame(() => { if (hashName() === "help") document.getElementById("help")?.scrollIntoView(); else scrollTo(0, pos[tab] ?? Math.min(scrollY, contentTop())); });
+      window.track?.("about: tab", { tab });
+    };
+    addEventListener("popstate", follow);
+    addEventListener("hashchange", follow);
+    // the looping videos: playing while in view (a hidden tab is never in view), paused otherwise
+    const loops = [...document.querySelectorAll("video[autoplay]")];
+    if ("IntersectionObserver" in window) {
+      loops.forEach((v) => v.removeAttribute("autoplay"));   // the observer starts them instead (so none plays behind a hidden tab)
+      const io = new IntersectionObserver((es) => es.forEach((e) => { const v = e.target; if (e.isIntersecting) { if (v.paused) v.play().catch(() => {}); } else if (!v.paused) v.pause(); }), { rootMargin: "150px 0px" });
+      loops.forEach((v) => io.observe(v));
+    }
+    show(fromHash(), true);
+    if (hashName() === "help") requestAnimationFrame(() => document.getElementById("help")?.scrollIntoView());
+  })();
+</script>
+<script>
+  // Credits: the live cards read the same feeds as the map, once, when the Credits tab first opens
+  (() => {
+    let done = false;
+    const set = (k, t) => { const el = document.querySelector('.card [data-live="' + k + '"]'); if (el && t) el.textContent = t; };
+    const get = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    const n = (x, one, many) => x.toLocaleString() + " " + (x === 1 ? one : many);
+    const WX = { 0: "clear", 1: "mostly clear", 2: "partly cloudy", 3: "overcast", 45: "foggy", 48: "foggy", 51: "drizzle", 53: "drizzle", 55: "drizzle", 61: "rain", 63: "rain", 65: "heavy rain", 80: "showers", 81: "showers", 82: "heavy showers", 95: "thunderstorms" };
+    async function load() {
+      if (done) return; done = true;
+      // each card fills in as its own feed answers (the satellite one can take a while)
+      get("api/vehicles").then((v) => {
+        if (!v || !v.vehicles) return;
+        const all = Object.values(v.vehicles), ct = all.filter((x) => /^CT:/.test(x.route)).length;
+        set("transit", n(all.length - ct, "bus or train", "buses and trains") + " on the map now");
+        set("caltrain", ct ? n(ct, "Caltrain", "Caltrains") + " running now" : "No Caltrains running right now");
+      });
+      get("api/boats").then((b) => { if (b && b.ships) set("boats", n(Object.keys(b.ships).length, "boat", "boats") + " on the bay now"); });
+      get("api/planes").then((p) => { if (p && p.ac) set("planes", n(p.ac.length, "plane", "planes") + " overhead now"); });
+      get("https://api.open-meteo.com/v1/forecast?latitude=37.7936&longitude=-122.3965&current=temperature_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FLos_Angeles").then((w) => {
+        if (w && w.current) set("weather", Math.round(w.current.temperature_2m) + "°F and " + (WX[w.current.weather_code] || "changeable") + ", wind " + Math.round(w.current.wind_speed_10m) + " mph");
+      });
+      get("api/fog").then((f) => {
+        if (!f || !f.d || !f.time) return;
+        try {
+          const raw = atob(f.d); let fog = 0; for (let i = 0; i < raw.length; i++) if (raw.charCodeAt(i) > 128) fog++;
+          const at = new Date(f.time).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Los_Angeles" });
+          const share = fog / raw.length;
+          set("fog", (share > 0.04 ? "Fog over " + Math.round(share * 100) + "% of the map" : "No fog") + " on the " + at + " pass");
+        } catch {}
+      });
+    }
+    if (document.documentElement.dataset.tab === "credits") load();
+    document.addEventListener("how:tab", (e) => { if (e.detail.tab === "credits") load(); });
+  })();
+</script>
+<script>
+  // back to the top: shows once you're most of a screen down
+  (() => {
+    const b = document.querySelector(".totop"); if (!b) return;
+    const upd = () => b.classList.toggle("on", scrollY > innerHeight * 0.9);
+    addEventListener("scroll", upd, { passive: true }); upd();
+    b.addEventListener("click", () => { scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); b.blur(); window.track?.("about: to top"); });
+  })();
+</script>
+<script>
+  // the chapter rail: a strip of the city that's the 3D render below the reading point and the drawing above it
+  (() => {
+    const rail = document.querySelector(".rail"), story = document.getElementById("tab-story"); if (!rail || !story) return;
+    const hs = [...story.querySelectorAll("h2")]; if (!hs.length) return;
+    hs.forEach((h, i) => { if (!h.id) h.id = "ch-" + (i + 1); });
+    rail.innerHTML = '<div class="strip"><i class="r"></i><i class="d"></i><span class="hov"></span><span class="now"></span></div><div class="pct"></div><span class="lab"></span>';
+    const strip = rail.querySelector(".strip"), hov = rail.querySelector(".hov"), lab = rail.querySelector(".lab"), pct = rail.querySelector(".pct");
+    const notches = hs.map((h) => { const n = document.createElement("span"); n.className = "notch"; rail.appendChild(n); return n; });
+    // keyboard and screen readers: a plain list of chapter links (shown on focus)
+    hs.forEach((h, k) => { const a = document.createElement("a"); a.className = "sr"; a.href = "#" + h.id; a.textContent = (k + 1) + ". " + h.textContent; rail.appendChild(a); });
+    let top0 = 0, span = 1, hy = [], H = 343;
+    const absTop = (el) => el.getBoundingClientRect().top + scrollY;
+    const frac = (y) => Math.max(0, Math.min(1, (y - top0) / span));           // page scroll position -> 0..1 down the strip
+    const chapterAt = (f) => { let k = 0; hy.forEach((y, i) => { if (frac(y) <= f + 0.004) k = i; }); return k; };
+    function layout() {
+      if (!story.offsetParent) return;
+      top0 = absTop(story) - 40; span = Math.max(1, absTop(story) + story.offsetHeight - innerHeight - top0);
+      hy = hs.map((h) => absTop(h) - 40); H = strip.offsetHeight;
+      notches.forEach((n, k) => { n.style.top = (frac(hy[k]) * H) + "px"; });
+      paint();
+    }
+    function paint() {
+      const f = frac(scrollY), k = chapterAt(f);
+      rail.style.setProperty("--p", (f * 100).toFixed(2) + "%");
+      pct.textContent = Math.round(f * 100) + "% explored";
+      notches.forEach((n, i) => { n.classList.toggle("read", i < k); n.classList.toggle("cur", i === k); });
+      rail.classList.toggle("on", scrollY > absTop(hs[0]) - innerHeight * 0.9);
+    }
+    function point(e) {
+      const r = strip.getBoundingClientRect(), y = Math.max(0, Math.min(r.height, e.clientY - r.top)), f = y / r.height;
+      // snap to a chapter's notch when close to it
+      let k = chapterAt(f), snap = null;
+      hy.forEach((yy, i) => { if (Math.abs(frac(yy) * r.height - y) < 9) { snap = i; k = i; } });
+      return { y: snap != null ? frac(hy[snap]) * r.height : y, f, k, snap };
+    }
+    strip.addEventListener("pointermove", (e) => {
+      const p = point(e);
+      hov.style.top = p.y + "px"; lab.style.top = (p.y + strip.offsetTop) + "px";
+      lab.innerHTML = "<b>" + (p.k + 1) + "</b>" + hs[p.k].textContent.replace(/[<>&]/g, "");
+      notches.forEach((n, i) => n.classList.toggle("near", i === p.k)); rail.classList.add("hover");
+    });
+    strip.addEventListener("pointerleave", () => { if (drag) return; rail.classList.remove("hover"); notches.forEach((n) => n.classList.remove("near")); });
+    // press and drag to scrub through the story (it snaps to a chapter's notch on the way past); a plain click glides there
+    let drag = null;
+    const target = (p) => Math.max(0, p.snap != null ? hy[p.snap] : top0 + p.f * span);
+    strip.addEventListener("pointerdown", (e) => {
+      if (e.button) return;
+      drag = { x: e.clientX, y: e.clientY, moved: false }; strip.setPointerCapture(e.pointerId); rail.classList.add("drag");
+    });
+    strip.addEventListener("pointermove", (e) => {
+      if (!drag) return;
+      if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 3) return;
+      drag.moved = true; scrollTo(0, target(point(e)));
+    });
+    const end = (e) => {
+      if (!drag) return;
+      const p = point(e), moved = drag.moved; drag = null; rail.classList.remove("drag");
+      if (!moved) scrollTo({ top: target(p), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      window.track?.(moved ? "about: rail drag" : "about: rail", { chapter: hs[p.k]?.textContent });
+      if (!strip.matches(":hover")) { rail.classList.remove("hover"); notches.forEach((n) => n.classList.remove("near")); }
+    };
+    strip.addEventListener("pointerup", end);
+    strip.addEventListener("pointercancel", end);
+    addEventListener("scroll", paint, { passive: true });
+    addEventListener("resize", layout);
+    addEventListener("load", layout);
+    document.addEventListener("how:tab", (e) => { if (e.detail.tab === "story") requestAnimationFrame(layout); });
+    new ResizeObserver(() => layout()).observe(story);   // images and videos settle the page's height as they load
+    layout();
+  })();
+</script>
+
+<script>
+// A small ant climbs out of "ant colony" on hover (or tap) and wanders off the screen.
+(function () {
+  const word = document.querySelector(".antword");
+  if (!word || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const SVG = '<svg viewBox="0 0 22 22" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round">'
+    + '<g class="l1"><path d="M9 9 L5 6"/><path d="M11 11 L5 12"/><path d="M13 13 L10 18"/></g>'
+    + '<g class="l2"><path d="M13 9 L17 6"/><path d="M11 11 L17 12"/><path d="M9 13 L12 18"/></g>'
+    + '<path d="M10 3 L8 0.5"/><path d="M12 3 L14 0.5"/></g>'
+    + '<g fill="currentColor"><ellipse cx="11" cy="4.6" rx="2" ry="1.9"/><ellipse cx="11" cy="9.4" rx="1.7" ry="2.4"/><ellipse cx="11" cy="15.4" rx="2.6" ry="3.6"/></g></svg>';
+  let live = 0, last = 0;
+  function spawn() {
+    const now = performance.now();
+    if (live >= 4 || now - last < 350) return;
+    last = now; live++;
+    const r = word.getBoundingClientRect();
+    const el = document.createElement("div");
+    el.className = "ant"; el.innerHTML = SVG; document.body.appendChild(el);
+    let x = r.left + Math.random() * r.width, y = r.top + r.height * 0.4;
+    let h = -Math.PI / 2 + (Math.random() - 0.5) * 2.2;   // heading, radians (0 = right); mostly upward to start
+    const v = 70 + Math.random() * 50;                     // px per second
+    const born = now; let t0 = now, turn = 0, stepT = 0;
+    function frame(t) {
+      const dt = Math.min(0.05, (t - t0) / 1000); t0 = t;
+      turn += (Math.random() - 0.5) * 8 * dt; turn *= 0.96; h += turn * dt * 6;
+      x += Math.cos(h) * v * dt; y += Math.sin(h) * v * dt;
+      if ((stepT += dt) > 0.07) { stepT = 0; el.classList.toggle("step"); }
+      const pop = Math.min(1, (t - born) / 220), s = pop < 1 ? 0.3 + 0.7 * (1 - Math.pow(1 - pop, 3)) : 1;
+      el.style.transform = `translate(${x - 11}px, ${y - 11}px) rotate(${h + Math.PI / 2}rad) scale(${s})`;
+      if (x < -40 || y < -40 || x > innerWidth + 40 || y > innerHeight + 40 || t - born > 30000) { el.remove(); live--; return; }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+  word.addEventListener("mouseenter", spawn);
+  word.addEventListener("click", spawn);
+})();
+</script>
+<script>
+// all-time page views, from Seline via api/visits, refreshed every 30 s while the page is open; the number rolls up to
+// each new count. Left out if it can't be read.
+(() => {
+  const el = document.querySelector(".by .views"), n = el && el.querySelector(".n"); if (!n) return;
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let shown = 0, raf = 0;
+  const show = (v) => (n.textContent = Math.round(v).toLocaleString("en-US"));
+  const roll = (to) => {
+    cancelAnimationFrame(raf);
+    const from = shown || to - Math.min(60, Math.round(to * 0.004)), t0 = performance.now(), dur = calm ? 0 : shown ? 1400 : 1100;
+    const step = (t) => { const k = dur ? Math.min(1, (t - t0) / dur) : 1, e = 1 - Math.pow(1 - k, 3); show(from + (to - from) * e); if (k < 1) raf = requestAnimationFrame(step); else shown = to; };
+    raf = requestAnimationFrame(step);
+    if (shown && to > shown) { el.classList.add("bump"); setTimeout(() => el.classList.remove("bump"), 1500); }
+  };
+  const load = () => fetch("api/visits", { cache: "no-store" }).then((r) => r.json()).then((d) => { if (!d.views) return; el.hidden = false; if (d.views !== shown) roll(d.views); }).catch(() => {});
+  load(); setInterval(() => { if (!document.hidden) load(); }, 30e3);
+})();
+</script>
+</body>
+</html>

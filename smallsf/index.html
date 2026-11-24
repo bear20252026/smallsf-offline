@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌁</text></svg>">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>if (/^\/sf(\/|$)/.test(location.pathname)) document.write('<base href="/sf/">');  // the old dutilh.net/sf proxy (smallsf.com serves from the root)</script>
+<title>Small SF: an illustrated, live map of San Francisco</title>
+<meta name="description" content="An illustrated, isometric map of San Francisco you can drag and zoom through, with live Muni, BART, ferries, planes, simulated traffic and the real sky.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Small SF: an illustrated, live map of San Francisco">
+<meta property="og:site_name" content="Small SF">
+<meta property="og:description" content="An illustrated, isometric map of San Francisco you can drag and zoom through, with live Muni, BART, ferries, planes, simulated traffic and the real sky.">
+<link rel="canonical" href="https://smallsf.com/">
+<meta property="og:url" content="https://smallsf.com/">
+<meta property="og:image" content="https://smallsf.com/share.gif?v=5">
+<meta property="og:image:type" content="image/gif">
+<meta property="og:image:width" content="800">
+<meta property="og:image:height" content="420">
+<meta property="og:image" content="https://smallsf.com/share.jpg?v=4">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:video" content="https://smallsf.com/share.mp4?v=4">
+<meta property="og:video:type" content="video/mp4">
+<meta property="og:video:width" content="1200">
+<meta property="og:video:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://smallsf.com/share.jpg?v=4">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&display=swap">
+<script src="vendor/openseadragon.min.js" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/openseadragon/5.0.1/openseadragon.min.js'"></script>
+<style>
+  :root { --paper: #f5f0e4; --ink: #1d2b30; --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; }
+  html, body { margin: 0; height: 100%; background: #10222a; overflow: hidden; }
+  #map { position: fixed; inset: 0; }
+  #map .openseadragon-canvas { cursor: grab; }
+  #map .openseadragon-canvas:active { cursor: grabbing; }
+  .tip { position: fixed; z-index: 3; background: var(--paper); color: var(--ink); font: 12px/1.4 -apple-system, sans-serif; padding: 6px 8px;
+         border: 1px solid rgba(29,43,48,.3); box-shadow: 2px 2px 0 rgba(0,0,0,.2); pointer-events: none; max-width: 240px; }
+  .tip b { padding: 1px 5px; border-radius: 3px; margin-right: 4px; }
+  .tip span { color: #5d6a6c; }
+  .credit a { color: inherit; }
+  .credit { position: fixed; right: 8px; bottom: 8px; z-index: 2; background: rgba(245,240,228,.85); color: var(--ink);
+            font: 10px/1 -apple-system, sans-serif; padding: 3px 5px; }
+  .minimap { position: fixed; right: 12px; bottom: 34px; z-index: 3; border: 2px solid var(--paper); box-shadow: 0 2px 10px rgba(0,0,0,.25); border-radius: 4px; overflow: hidden; line-height: 0; cursor: crosshair; }
+  @media (max-width: 700px) { .minimap { display: none; } body:has(#listpanel:not([hidden])) .status { display: none; } }
+  #card .ctboard table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 2px 0 4px; } #card .ctboard td { padding: 3px 4px 3px 0; border-top: 1px solid rgba(29,43,48,.12); } #card .ctboard tr.me td { font-weight: 700; } #card .ctboard tr.go { cursor: pointer; } #card .ctboard tr.go:hover td { background: rgba(238,93,74,.08); } #card .ctboard .late { color: #b3261e; font-weight: 600; } #card .ctttl { margin: 8px 0 2px; font-weight: 600; }
+  #card .shipphoto { margin: 6px 0 10px; } #card .shipphoto img { width: 100%; display: block; border: 1px solid rgba(29,43,48,.25); } #card .shipphoto figcaption { font-size: 11px; color: #5d6a6c; margin-top: 3px; }
+
+  /* ---- the panel, in dutilh.net's look: paper and coral, Cormorant Garamond to read, Inter for small labels ---- */
+  :root { --u-paper: rgba(235,230,220,.96); --u-solid: #EBE6DC; --u-card: #F6F1E7; --u-line: #E3DAC2; --u-ink: #23201c; --u-text: #3a352e; --u-soft: #6f675c; --u-mute: #8a8173;
+          --u-coral: #EE5D4A; --u-dot: #8c8273; --u-shadow: rgba(80,50,30,.45); --u-halo: #f1ece2;
+          --u-serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif; --u-sans: "Inter", -apple-system, system-ui, sans-serif; }
+  body[data-ui="dark"] { --u-paper: rgba(56,56,56,.95); --u-solid: #383838; --u-card: #3d3d3d; --u-line: #47474E; --u-ink: #ece6da; --u-text: #d9d2c5; --u-soft: #c4bdb0; --u-mute: #a8a196;
+          --u-coral: #EE7666; --u-dot: #8a857c; --u-shadow: rgba(0,0,0,.55); --u-halo: #1d1d20; }
+  .sq { position: fixed; right: 16px; top: 16px; z-index: 5; display: grid; gap: 10px; }
+  .sq button { width: 44px; height: 44px; display: grid; place-items: center; padding: 0; background: var(--u-paper); color: var(--u-coral); border: 1px solid var(--u-line); border-radius: 2px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .sq button:hover { background: var(--u-card); }
+  .sq button[hidden] { display: none; }
+  /* the map isn't north-up (it's drawn looking west-southwest): a small compass under the buttons, set from the camera */
+  .sq .compass { width: 44px; height: 44px; background: var(--u-paper); border: 1px solid var(--u-line); border-radius: 22px; box-sizing: border-box; }
+  .sq .compass svg { width: 42px; height: 42px; stroke: none; }
+  .sq .compass .n { fill: var(--u-coral); } .sq .compass .s { fill: var(--u-mute, #9a9187); }
+  .sq .compass .lbl { font: 700 9px/1 var(--u-sans, sans-serif); fill: var(--u-ink, #222); text-anchor: middle; dominant-baseline: central; }
+  .sq svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .sq .i-sun { fill: currentColor; } .sq .i-moon { fill: currentColor; stroke: none; }
+  body:not([data-ui="dark"]) .sq .i-moon, body[data-ui="dark"] .sq .i-sun { display: none; }
+  .sq [data-act="sound"][aria-pressed="true"] .i-snd-off, .sq [data-act="sound"]:not([aria-pressed="true"]) .i-snd-on { display: none; }
+  /* map labels: unboxed italic serif on the drawing */
+  .sq [hidden] { display: none !important; }
+  .gamepin { background: var(--u-card) !important; color: var(--u-ink) !important; font: 500 12px/1 var(--u-sans) !important; border-radius: 3px !important; padding: 4px 7px 4px 4px !important; box-shadow: 0 6px 18px -8px var(--u-shadow) !important; }
+  .gamepin span { color: var(--u-mute) !important; }
+  .tip { background: var(--u-card) !important; color: var(--u-ink) !important; font: 12.5px/1.45 var(--u-sans) !important; border: 1px solid rgba(0,0,0,.06) !important; border-radius: 8px !important; box-shadow: 0 10px 30px -12px var(--u-shadow) !important; padding: 7px 10px !important; }
+  .tip span { color: var(--u-mute) !important; }
+  /* a small callout that drops from the button that made it (Share): the bar's own paper, ink and line, so it follows
+     light and dark; a caret points up at the button. Without an anchor it sits centred under the bar. */
+  .toast { position: fixed; left: 50%; top: 72px; z-index: 60; display: flex; align-items: center; gap: 8px; padding: 10px 14px 10px 12px; white-space: nowrap; pointer-events: none;
+    background: var(--u-paper); color: var(--u-ink); border: 1px solid var(--u-line); border-radius: 4px; box-shadow: 0 14px 30px -16px var(--u-shadow);
+    font: italic 400 17px/1 var(--u-serif); transform: translateX(-50%); transform-origin: var(--ox, 50%) 0; transition: opacity .18s ease, transform .22s cubic-bezier(.2,.8,.2,1); }
+  .toast::before { content: ""; position: absolute; top: -6px; left: var(--ox, 50%); width: 10px; height: 10px; margin-left: -5px; background: inherit; border-left: 1px solid var(--u-line); border-top: 1px solid var(--u-line); transform: rotate(45deg); }
+  .toast svg { width: 15px; height: 15px; flex: none; stroke: var(--u-coral, #e85d4a); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .toast.gone { opacity: 0; transform: translateX(-50%) translateY(-4px) scale(.96); }
+  @media (prefers-reduced-motion: reduce) { .toast { transition: opacity .15s; } .toast.gone { transform: translateX(-50%); } }
+  .credit { background: transparent !important; color: rgba(255,255,255,.85) !important; text-shadow: 0 0 3px rgba(0,0,0,.7); font: 10px/1 var(--u-sans) !important; }
+  .minimap { border: 1px solid var(--u-line) !important; border-radius: 2px !important; box-shadow: 0 12px 30px -16px var(--u-shadow) !important; }
+
+  /* ---- top bar, drop-downs, status line and cards, in dutilh.net's look ---- */
+  .bar { position: fixed; left: 16px; top: 16px; z-index: 6; display: flex; align-items: center; gap: 18px; max-width: calc(100vw - 96px); padding: 0 18px; height: 46px; box-sizing: border-box;
+         background: var(--u-paper); color: var(--u-ink); border: 1px solid var(--u-line); border-radius: 4px; box-shadow: 0 12px 30px -16px var(--u-shadow); font: 18px/1 var(--u-serif); }
+  .bar .title { font: italic 400 21px/1 var(--u-serif); white-space: nowrap; padding-right: 18px; border-right: 1px solid var(--u-line); }
+  .tools { display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; }
+  .tools::-webkit-scrollbar { display: none; }
+  .tools button, .drop button, #card .x { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .tools button, .tools a { flex: none; padding: 3px 0 2px; border-bottom: 1px dotted transparent; white-space: nowrap; }
+  .tools a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }   /* About: a link to the about page */
+  .tools button:hover, .tools a:hover, .tools button[aria-expanded="true"] { color: var(--u-coral); border-bottom-color: var(--u-coral); }
+  .tools button:focus-visible, .tools a:focus-visible, .drop button:focus-visible, .sq button:focus-visible { outline: 2px solid var(--u-coral); outline-offset: 2px; }
+  .drop input:focus, .drop input:focus-visible { outline: none; }   /* the coral underline shows focus */
+  .drop, #card { position: fixed; left: 16px; top: 72px; z-index: 5; width: min(360px, calc(100vw - 32px)); box-sizing: border-box; max-height: calc(100vh - 150px); max-height: calc(100dvh - 150px); overflow: auto;
+         background: var(--u-card); color: var(--u-text); border: 1px solid rgba(0,0,0,.06); border-radius: 12px; box-shadow: 0 14px 34px -14px var(--u-shadow); font: 17px/1.42 var(--u-serif); }
+  .drop { padding: 14px 16px; display: grid; gap: 10px; }
+  .drop .find { display: flex; align-items: center; gap: 10px; padding-bottom: 7px; border-bottom: 1px solid var(--u-line); color: var(--u-mute); }
+  .drop .find:focus-within { border-bottom-color: var(--u-coral); }
+  .drop .find svg { flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .drop input { flex: 1; min-width: 0; font: italic 400 19px var(--u-serif); color: var(--u-ink); background: none; border: 0; outline: none; padding: 0; -webkit-appearance: none; appearance: none; }
+  .drop input::placeholder { color: var(--u-mute); }
+  .drop input::-webkit-search-cancel-button { -webkit-appearance: none; }
+  .drop .results { list-style: none; margin: 0; padding: 0; display: grid; }
+  .drop .results button { display: block; width: 100%; text-align: left; padding: 6px 8px; border-radius: 4px; font-size: 18px; line-height: 1.2; color: var(--u-ink); }
+  .drop .results button small { display: block; font: 12px/1.4 var(--u-sans); color: var(--u-mute); margin-top: 2px; }
+  .drop .results button:hover, .drop .results button.hi { background: rgba(0,0,0,.04); color: var(--u-coral); }
+  body[data-ui="dark"] .drop .results button:hover, body[data-ui="dark"] .drop .results button.hi { background: rgba(255,255,255,.06); }
+  .drop .note { margin: 0; font: 12.5px/1.4 var(--u-sans); color: var(--u-mute); }
+  .drop .layers { display: grid; gap: 2px; }
+  .drop .layers button { display: flex; align-items: baseline; gap: 10px; width: 100%; text-align: left; font-size: 20px; padding: 3px 0; color: var(--u-mute); }
+  .drop .layers button span { border-bottom: 1px dotted transparent; }
+  .drop .layers button[aria-pressed="true"] { color: var(--u-coral); }
+  .drop .layers button[aria-pressed="true"] span { border-bottom-color: var(--u-coral); }
+  .drop .layers small { margin-left: auto; font: 500 12.5px var(--u-sans); color: var(--u-mute); font-variant-numeric: tabular-nums; }
+  .drop .page h3 { margin: 4px 0 6px; font: 600 10.5px/1 var(--u-sans); letter-spacing: .14em; text-transform: uppercase; color: var(--u-coral); }
+  .drop .page ul { list-style: none; margin: 0 0 12px; padding: 0; display: grid; }
+  .drop .page li button { padding: 2px 0; font-size: 19px; text-align: left; color: var(--u-ink); }
+  .drop .page li button:hover { color: var(--u-coral); }
+  .drop .page p { margin: 0 0 10px; }
+  .drop .page h3 + p, .drop .page h3 + ul { margin-top: 0; }
+  .drop .page p.small { font-size: 16px; line-height: 1.45; }
+  .drop .page ul.facts { display: block; margin: 0 0 10px; }
+  .drop .page ul.facts li { font-size: 16px; line-height: 1.35; margin: 0 0 7px; }
+  .drop .page ul.facts b { display: block; font: 600 12.5px/1.3 var(--u-sans); color: var(--u-ink); }
+  .drop .page h3:not(:first-child) { margin-top: 16px; }
+  .drop .page .tvq { width: 100%; margin: 2px 0 12px; font: italic 400 18px var(--u-serif); color: var(--u-ink); background: none; border: 0; border-bottom: 1px solid var(--u-line); padding: 4px 0 6px; outline: none; }
+  .drop .page .tvq:focus { border-bottom-color: var(--u-coral); }
+  .drop .page li.soon { position: relative; }
+  .drop .page li.soon > button { color: var(--u-mute); opacity: .55; cursor: default; }
+  .drop .page li.soon > button:hover { color: var(--u-mute); }
+  .drop .page .soontip { display: none; position: absolute; left: 0; top: 100%; z-index: 2; width: max-content; max-width: 260px; margin-top: 0; padding: 8px 10px; border-radius: 8px; background: var(--u-ink); color: var(--u-card); font: 12.5px/1.45 var(--u-sans); box-shadow: 0 10px 24px -12px var(--u-shadow); }
+  .drop .page .soontip::before { content: ""; position: absolute; left: 0; right: 0; top: -8px; height: 8px; }   /* a bridge, so the mouse can reach the link */
+  .drop .page .soontip a { color: inherit; border-bottom-color: currentColor; }
+  .drop .page li.soon:hover .soontip, .drop .page li.soon.open .soontip, .drop .page li.soon:focus-within .soontip { display: block; }
+  .drop .page ul.tvr li button small { font: 12px var(--u-sans); color: var(--u-mute); margin-left: 6px; }
+  .drop .page .log { margin: 0; font: 13px/1.5 var(--u-sans); color: var(--u-ink); }
+  .drop .page .log dt { margin: 8px 0 2px; font-weight: 600; color: var(--u-soft); }
+  .drop .page .log dd { margin: 0; }
+  .drop .page .log ul { margin: 0; padding-left: 16px; list-style: disc; display: block; }
+  .drop .page .log li { margin: 0 0 2px; }
+  .drop .page .credits { font: 12px/1.55 var(--u-sans); color: var(--u-soft); border-top: 1px solid var(--u-line); padding-top: 10px; }
+  .drop a, #card a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--u-dot); }
+  .drop a:hover, #card a:hover { color: var(--u-coral); border-bottom-color: var(--u-coral); }
+  #card { padding: 14px 16px 12px; font-size: 16.5px; }
+  #card::before { content: "Selected"; display: block; margin-bottom: 8px; font: 600 10.5px/1 var(--u-sans); letter-spacing: .14em; text-transform: uppercase; color: var(--u-coral); }
+  #card h2 { margin: 0 26px 6px 0; font: 500 26px/1.05 var(--u-serif); color: var(--u-ink); }
+  #card p { margin: 0 0 7px; }
+  #card .x { position: absolute; top: 9px; right: 10px; width: 24px; height: 24px; font: 400 22px/1 var(--u-sans); color: var(--u-mute); }
+  #card .x:hover { color: var(--u-coral); }
+  #card .meta { font: 12px/1.45 var(--u-sans); color: var(--u-mute); }
+  #card .route { font-size: 16px; font-weight: 600; margin: 2px 0 4px; }
+  #card .route .iata { font: 600 11px var(--u-sans); color: var(--u-mute); letter-spacing: .04em; }
+  #card .route.soft { font-size: 13px; font-weight: 400; color: var(--u-mute); }
+  #card .badge { display: inline-block; padding: 1px 7px; border-radius: 3px; font: 600 14px/1.4 var(--u-sans); vertical-align: 3px; margin-right: 6px; }
+  #card .cam { margin: 10px 0 4px; } #card .cam iframe, #card .cam img { width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 6px; display: block; background: #000; }
+  #card .cam small { font: 11px var(--u-sans); color: var(--u-mute); }
+  #card .shipphoto img { border-radius: 6px; border: 0; } #card .shipphoto figcaption { font: 11px/1.4 var(--u-sans); color: var(--u-mute); }
+  #card table { font: 12.5px var(--u-sans); }
+  .drop[hidden], #card[hidden], .drop [hidden] { display: none !important; }
+  .status { position: fixed; left: 16px; bottom: 16px; z-index: 4; margin: 0; max-width: min(940px, calc(100vw - 250px)); padding: 9px 16px 10px; box-sizing: border-box;
+            display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 18px;
+            background: var(--u-paper); color: var(--u-text); border: 1px solid var(--u-line); border-radius: 4px; box-shadow: 0 12px 30px -16px var(--u-shadow); font: 16.5px/1.35 var(--u-serif); }
+  .status #now { display: contents; }
+  .status #when, .status .g { white-space: nowrap; }
+  .status #when { font-style: italic; color: var(--u-ink); }
+  .status .g.soft { color: var(--u-soft); }
+  .status .live-n { color: var(--u-coral); font-variant-numeric: tabular-nums; }
+  .status .live-n::before { content: ""; display: inline-block; width: 6px; height: 6px; background: var(--u-coral); margin: 0 5px 2px 0; vertical-align: middle; animation: ublink 1.4s steps(1) infinite; }
+  .status .loading { color: var(--u-mute); font-style: italic; }
+  @keyframes ublink { 50% { opacity: .15; } }
+  @media (prefers-reduced-motion: reduce) { .status .live-n::before { animation: none; } }
+  /* map labels: small paper tags with a stem, like the site's pop-overs */
+  .pin { contain: layout style; -webkit-appearance: none; appearance: none; position: relative; transform: translateY(-10px); font: 500 15px/1 var(--u-serif); color: var(--u-ink); white-space: nowrap; cursor: pointer;
+         background: var(--u-card); padding: 5px 9px 6px; border: 1px solid rgba(0,0,0,.07); border-radius: 6px; box-shadow: 0 6px 16px -8px rgba(60,40,20,.55); transition: opacity .25s, color .15s; }
+  .pin::after { content: ""; position: absolute; left: 50%; bottom: -7px; width: 1px; height: 7px; background: var(--u-dot); }
+  .pin.park { color: #3d6a2c; }
+  body[data-ui="dark"] .pin.park { color: #b9d8a4; }
+  .pin:hover { color: var(--u-coral); }
+  .pin .camdot { display: inline-block; width: 6px; height: 6px; background: var(--u-coral); margin-left: 6px; vertical-align: 2px; }
+  .searchpin { position: relative; transform: translateY(-12px); font: 500 15px/1 var(--u-serif); color: var(--u-ink); white-space: nowrap; pointer-events: none;
+         background: var(--u-card); padding: 5px 9px 6px 20px; border: 1px solid rgba(0,0,0,.07); border-radius: 6px; box-shadow: 0 6px 16px -8px rgba(60,40,20,.55); }
+  .searchpin::before { content: ""; position: absolute; left: 8px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; background: var(--u-coral); animation: ublink 1.4s steps(1) infinite; }
+  .searchpin::after { content: ""; position: absolute; left: 50%; bottom: -12px; width: 1px; height: 12px; background: var(--u-coral); }
+  .pin.off, body.nolabels .pin, body.nolabels .gamepin { opacity: 0; pointer-events: none; }
+  @media (max-width: 700px) {
+    .bar { left: max(10px, env(safe-area-inset-left)); top: max(10px, env(safe-area-inset-top)); max-width: calc(100vw - 72px); padding: 0 12px; height: 42px; font-size: 17px; }
+    .bar .title { display: none; }
+    .tools { gap: 11px; }   /* six words (Search to About) fit a 390 px phone */
+    .drop, #card { left: 10px; top: calc(max(10px, env(safe-area-inset-top)) + 52px); width: calc(100vw - 72px); max-height: 60vh; max-height: 60dvh; }   /* clear of the square buttons */
+    .status { left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); max-width: none; font-size: 15.5px; }
+    .sq { top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); gap: 8px; }
+    .sq button { width: 42px; height: 42px; }
+    .credit { bottom: auto !important; top: calc(max(10px, env(safe-area-inset-top)) + 50px); left: 12px; right: auto !important; }
+    .minimap { display: none; }
+  }
+</style>
+<!-- Seline analytics (its own smallsf project); events are queued until the script loads -->
+<script>
+// A browser can load this page in a hidden tab before it's opened (Chrome/Arc prerender the address you're typing). The
+// map's WebGL set up there draws black once the tab is shown (Arc, 11/19), so don't start until it's really opened.
+if (document.prerendering) { window.__prerender = true; document.addEventListener("prerenderingchange", () => location.reload(), { once: true }); }
+</script>
+<script>window.__mobile = matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 700 || /[?&]mobile\b/.test(location.search);   // ?mobile: phone settings on a desktop, for testing
+window.__dpr = Math.min(devicePixelRatio || 1, window.__mobile ? 2 : 3);   // overlay canvases: 2x is plenty on phones
+window.__softDpr = 1;   // soft layers (clouds, glows): blurry by design, so fewer pixels
+window.seline = window.seline || { queue: [], track: function () { this.queue.push({ method: "track", args: [].slice.call(arguments) }); } }; window.track = function (n, d) { try { window.seline.track(n, d); } catch (e) {} };</script>
+<script async src="https://cdn.seline.com/seline.js" data-token="1c6f21dbc7fdb1b" data-outbound="true"></script>
+</head>
+<body>
+<div id="map"></div>
+<header class="bar" id="bar">
+  <span class="title">Small SF</span>
+  <nav class="tools" aria-label="Map">
+    <button type="button" data-act="search" aria-expanded="false" title="Search (/)">Search</button>
+    <button type="button" data-act="places" aria-expanded="false">Places</button>
+    <button type="button" data-act="layers" aria-expanded="false">Layers</button>
+    <button type="button" data-act="tv" aria-expanded="false">TV</button>
+    <button type="button" data-act="share" title="Copy a link to this view">Share</button>
+    <a href="about" data-act="about">About</a>
+  </nav>
+</header>
+<div class="drop" id="drop" hidden>
+  <div class="find" id="findbox" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input id="q" type="search" placeholder="Find a building, street or place…" aria-label="Find a building, street or place" autocomplete="off" enterkeyhint="search"></div>
+  <ul class="results" id="sr" hidden></ul><p class="note" id="sn" hidden></p>
+  <section class="layers" id="layers" aria-label="Layers" hidden>
+    <button type="button" data-layer="transit" aria-pressed="true"><span>Buses &amp; trains</span><small id="n-transit"></small></button>
+    <button type="button" data-layer="boats" aria-pressed="true"><span>Boats on the bay</span><small id="n-boats"></small></button>
+    <button type="button" data-layer="planes" aria-pressed="true"><span>Planes overhead</span><small id="n-planes"></small></button>
+    <button type="button" data-layer="cars" aria-pressed="true"><span>Street traffic</span><small>simulated</small></button>
+    <button type="button" data-layer="labels" aria-pressed="true"><span>Labels</span><small></small></button>
+  </section>
+  <section class="page" id="page" hidden></section>
+</div>
+<div id="card" hidden></div>
+<div class="status" id="status" aria-live="off"><span id="when"></span><span id="now"><span class="g loading">Loading the city…</span></span></div>
+<div class="sq" id="sq">
+  <button type="button" data-act="theme" aria-label="Light or dark panel" title="Light or dark panel"><svg viewBox="0 0 24 24" aria-hidden="true" class="i-sun"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7 7 17M17 7l1.7-1.7"/></svg><svg viewBox="0 0 24 24" aria-hidden="true" class="i-moon"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
+  <button type="button" data-act="in" aria-label="Zoom in (+)" title="Zoom in (+)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button type="button" data-act="out" aria-label="Zoom out (−)" title="Zoom out (−)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+  <button type="button" data-act="full" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+  <button type="button" data-act="sound" aria-pressed="false" aria-label="Sound off" title="Sound off"><svg viewBox="0 0 24 24" aria-hidden="true" class="i-snd-off"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg><svg viewBox="0 0 24 24" aria-hidden="true" class="i-snd-on"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18.3 6.3a8 8 0 0 1 0 11.4"/></svg></button>
+  <div class="compass" role="img" aria-label="Compass: north points to the right on this map" title="North"><svg viewBox="0 0 44 44" aria-hidden="true"><g class="needle"><path d="M22 6l5 16h-10z" class="n"/><path d="M22 38l-5-16h10z" class="s"/></g><text x="22" y="22" class="lbl">N</text></svg></div>
+</div>
+<div class="live" id="live" hidden></div>
+<div class="sky" id="sky" hidden></div>
+<div class="credit">Map data ©Google · © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></div>
+<script src="geo.js?v=75313547bb"></script>
+<script>
+if (window.__prerender) throw new Error("prerendering: the map starts when the page is shown");
+const dzi = (url, W, H) => ({ Image: { xmlns: "http://schemas.microsoft.com/deepzoom/2008", Url: url, Format: "webp", Overlap: "1", TileSize: "1024", Size: { Width: String(W), Height: String(H) } } });
+Promise.all(["map.json", "geo.json", "photo.json", "far.json"].map((f) => fetch(f, { cache: "no-cache" }).then((r) => (r.ok ? r.json() : null)))).then(([map, geo, photo, far]) => {
+  const { W, H } = map;
+  // phones: draw the map at 2x at most (a 3x screen paints 2.25 times the pixels for detail you can't see)
+  if (window.__mobile) { const g = OpenSeadragon.getCurrentPixelDensityRatio; OpenSeadragon.getCurrentPixelDensityRatio = () => Math.min(2, g()); OpenSeadragon.pixelDensityRatio = OpenSeadragon.getCurrentPixelDensityRatio(); }
+  // WebGL, or plain canvas on phones, with ?drawer=canvas, or where the WebGL map came out black before (sf-drawer)
+  {
+    const qd = new URLSearchParams(location.search).get("drawer");
+    let saved = null; try { saved = localStorage.getItem("sf-drawer"); } catch {}
+    window.__useCanvas = qd ? qd === "canvas" : !!(window.__mobile || saved === "canvas");
+  }
+  window.viewer = OpenSeadragon({
+    id: "map", showNavigationControl: false,
+    // phones run out of memory fast (iOS kills the tab): plain canvas renderer, a smaller tile cache, fewer parallel loads
+    drawer: window.__useCanvas ? "canvas" : ["webgl", "canvas"], crossOriginPolicy: "Anonymous",   // tiles come from tiles.smallsf.com (R2, CORS allows this site)
+    maxImageCacheCount: window.__mobile ? 50 : 200,
+    maxZoomPixelRatio: 1.25, visibilityRatio: 0.6, animationTime: 0.6, springStiffness: 9, zoomPerScroll: 1.2,
+    imageLoaderLimit: window.__mobile ? 4 : 8, tileRetryMax: 6, tileRetryDelay: 2000,   // a dropped connection (sleep, wifi, DNS) retries tiles instead of leaving them blank
+     blendTime: 0.2, minPixelRatio: (devicePixelRatio || 1) >= 1.75 ? 1 : 0.5,   // high-density screens: tiles at the screen's own resolution (half the data; the difference is invisible at 2x) smoothTileEdgesMinZoom: Infinity,
+    // panning, flinging and zooming are driven by our own camera physics below; OSD keeps pinch and its springs for fly-tos
+    gestureSettingsMouse: { clickToZoom: false, dblClickToZoom: false, flickEnabled: false, scrollToZoom: false },
+    gestureSettingsTouch: { pinchRotate: false, flickEnabled: false, dblClickToZoom: false },
+    gestureSettingsPen: { clickToZoom: false, flickEnabled: false },
+  });
+  // Tiles are decoded off the main thread before they're first drawn. Left alone, OpenSeadragon copies each fresh 1024px
+  // tile into a canvas of its own the first time it's painted, decoding it right there mid-frame (the hitch you feel
+  // panning) and keeping a second full-size copy around. We hand it a background-
+  // decoded ImageBitmap instead (both renderers only read .width/.height and draw or upload it).
+  const bitmaps = !!window.createImageBitmap && !/[?&]nobm/.test(location.search);
+  if (bitmaps) {
+    // WebGL checks each tile for cross-origin taint by reading a pixel back from a canvas: a GPU stall per tile.
+    // Our tiles are same-origin, and a bitmap can't be read that way, so answer for it directly.
+    const tainted = OpenSeadragon.isCanvasTainted;
+    OpenSeadragon.isCanvasTainted = (c) => (window.ImageBitmap && c instanceof ImageBitmap ? false : tainted(c));
+    for (const TS of [OpenSeadragon.TileSource.prototype, OpenSeadragon.DziTileSource.prototype]) {   // DZI copies the base methods
+      const asCtx = TS.getTileCacheDataAsContext2D, destroy = TS.destroyTileCache;
+      TS.getTileCacheDataAsContext2D = function (co) {
+        if (!co._renderedContext && co._data && co._data.__bm) { co._renderedContext = { canvas: co._data.__bm }; co._data = null; }
+        return co._renderedContext || asCtx.call(this, co);
+      };
+      TS.destroyTileCache = function (co) { const c = co._renderedContext && co._renderedContext.canvas; if (c && c.close) c.close(); destroy.call(this, co); };
+    }
+  }
+  // WebGL keeps its own copy of each tile on the GPU, and only uses the bitmap as a key after that: free its pixels
+  if (bitmaps && viewer.drawer.getType?.() === "webgl") viewer.addHandler("tile-ready", (e) => {
+    const c = e.tile.getCanvasContext?.()?.canvas;
+    if (c instanceof ImageBitmap && viewer.drawer._TextureMap?.has(c)) c.close();
+  });
+  // OpenSeadragon's WebGL blending assumes premultiplied colour; a plain upload hands it straight alpha, so the soft
+  // edges where the drawing fades over the photo came out as a bright band. A premultiplied bitmap fixes that.
+  const bmOpts = viewer.drawer.getType?.() === "webgl" ? { premultiplyAlpha: "premultiply" } : {};
+  viewer.addHandler("tile-loaded", (e) => {
+    const img = e.data || e.image; if (!img || !img.decode) return;
+    const done = e.getCompletionCallback();
+    img.decode().then(() => (bitmaps ? createImageBitmap(img, bmOpts).then((bm) => { img.__bm = bm; }) : null)).then(done, done);
+  });
+  // Both layers sit in camera-space kilometres: the whole city as a photo underneath, the drawn portions on top
+  const place = (x0, y1, widthM) => ({ x: x0 / 1000, y: -y1 / 1000, width: widthM / 1000 });
+  const added = [];
+  let photoItem = null;
+  if (photo) added.push(new Promise((ok) => viewer.addTiledImage({ tileSource: dzi(photo.tiles || "photo_files/", photo.W, photo.H), ...place(photo.x0, photo.y1, photo.W * photo.mpp), index: 0, success: (e) => { photoItem = e.item; ok(); }, error: ok })));
+  // the wider bay (Marin, the East Bay) at a quarter of the detail, under everything; fog.js clouds over its edges
+  let farItem = null;
+  if (far) added.push(new Promise((ok) => viewer.addTiledImage({ tileSource: dzi(far.tiles || "far_files/", far.W, far.H), ...place(far.x0, far.y1, far.W * far.mpp), success: (e) => { farItem = e.item; ok(); }, error: ok })));
+  added.push(new Promise((ok) => viewer.addTiledImage({ tileSource: dzi(map.tiles || "map_files/", W, H), ...place(geo.x0, geo.y1, W * geo.mpp), success: (e) => { window.mapItem = e.item; ok(); } })));
+  // one small soft image of the whole drawing, right under it: a fast pan or a fly-to shows a blurry version of the
+  // drawing at once, sharpening as tiles arrive, instead of the photo or empty squares popping in
+  let previewItem = null;
+  added.push(new Promise((ok) => viewer.addTiledImage({ tileSource: { type: "image", url: (map.tiles || "map_files/") + "preview.webp", buildPyramid: false }, ...place(geo.x0, geo.y1, W * geo.mpp), success: (e) => { previewItem = e.item; ok(); }, error: ok })));
+  Promise.all(added).then(() => {
+    if (farItem) viewer.world.setItemIndex(farItem, 0);
+    if (previewItem) viewer.world.setItemIndex(previewItem, viewer.world.getIndexOfItem(window.mapItem));
+    // open on a shared view (?at=lat,lon,metres-across from Copy link), else the Ferry Building about 640 m across
+    // ?at= is what Copy link gives (the server sees it and makes a preview picture of the view); #lat,lon,m is older links
+    const hv = /^(?:#|\?(?:.*&)?at=)(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(\d+(?:\.\d+)?)m?(?:&|$)/.exec(location.hash || ((at) => (at ? "?at=" + at : ""))(new URLSearchParams(location.search).get("at")));   // URLSearchParams decodes %2C (the old dutilh.net/sf redirect sends commas so) and never throws on a stray %
+    const view = hv && Math.abs(+hv[1] - 37.76) < 0.2 && Math.abs(+hv[2] + 122.44) < 0.2 ? { lat: +hv[1], lon: +hv[2], m: Math.max(20, Math.min(20000, +hv[3])) } : { lat: 37.7953, lon: -122.3936, m: 640 };
+    const p = IsoGeo.make(geo, null).toPixelAt(view.lat, view.lon, 10), vp = viewer.viewport, mi = window.mapItem;
+    vp.panTo(mi.imageToViewportCoordinates(p.x, p.y), true);
+    vp.zoomTo(mi.imageToViewportZoom(viewer.container.clientWidth / (view.m / geo.mpp)), null, true);
+    vp.applyConstraints(true);
+    // a shared list without a view: frame its pins (room for the list panel on the left, or below on a phone)
+    const qs = new URLSearchParams(location.search), lp = qs.getAll("p").map((x) => /^(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/.exec(x)).filter(Boolean);
+    if (lp.length && !hv) {
+      const G0 = IsoGeo.make(geo, null), ps = lp.map((m) => G0.toPixelAt(+m[1], +m[2], 10)), pad = 180 / geo.mpp;
+      const bx0 = Math.min(...ps.map((p) => p.x)) - pad, bx1 = Math.max(...ps.map((p) => p.x)) + pad, by0 = Math.min(...ps.map((p) => p.y)) - pad * 1.6, by1 = Math.max(...ps.map((p) => p.y)) + pad * 0.6;
+      const cw = viewer.container.clientWidth, ch = viewer.container.clientHeight, side = cw > 700 ? 360 : 0, below = cw > 700 ? 0 : ch * 0.45;
+      const k = Math.min((cw - side) / (bx1 - bx0), (ch - below - 80) / (by1 - by0), 2.2 * geo.mpp);
+      vp.zoomTo(mi.imageToViewportZoom(k), null, true);
+      vp.panTo(mi.imageToViewportCoordinates((bx0 + bx1) / 2 - side / 2 / k, (by0 + by1) / 2 + below / 2 / k), true);
+      window.__listFramed = true;
+    }
+    // ---- the opening: down through the clouds onto the view ----
+    // The screen starts under the same cream cloud as the fog round the map; the clouds billow outward and thin as the
+    // camera drops from high over the city to where it's headed. Every load, except reduced motion, TV mode (?tv) and
+    // ?nointro; any click, scroll or key lands at once.
+    let introDone = Promise.resolve();
+    if (!(qs.has("tv") || qs.has("nointro") || matchMedia("(prefers-reduced-motion: reduce)").matches)) introDone = intro();
+    function intro() {
+      const tc = vp.getCenter(true), tz = vp.getZoom(true), cw = innerWidth, chh = innerHeight, tall = chh > cw;
+      // start high over the city, but not so high that a tall phone screen sees past the edge of the map
+      const zs = Math.max(vp.getMinZoom(), tz / (tall ? 9 : 26));
+      vp.zoomTo(zs, null, true); vp.panTo(tc, true);
+      // day, dusk or night cloud, from the sun's height (SunCalc, as atmosphere.js)
+      const rad = Math.PI / 180, d = Date.now() / 864e5 - 0.5 + 2440588 - 2451545, M = rad * (357.5291 + 0.98560028 * d);
+      const L = M + rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M)) + rad * 102.9372 + Math.PI, e = rad * 23.4397;
+      const dec = Math.asin(Math.sin(e) * Math.sin(L)), ra = Math.atan2(Math.sin(L) * Math.cos(e), Math.cos(L)), H = rad * (280.16 + 360.9856235 * d) + rad * -122.42 - ra, phi = rad * 37.77;
+      const alt = qs.has("sun") ? +qs.get("sun") : Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H)) / rad;   // ?sun= previews, as atmosphere.js
+      const night = Math.max(0, Math.min(1, (2 - alt) / 10)), mix = (a, b) => a.map((v, k) => Math.round(v + (b[k] - v) * night));
+      // night cloud is lit only faintly from above: a strong highlight on dark cloud reads as bubbles
+      const lit = mix([252, 249, 243], [146, 153, 176]), body = mix([236, 231, 222], [124, 131, 156]), shade = mix([206, 203, 200], [104, 111, 138]);
+      // a few cumulus puffs drawn once (lit on top, shaded underneath), then only scaled and faded each frame
+      const sprite = (seed) => {
+        const S = 256, c = Object.assign(document.createElement("canvas"), { width: S, height: S }), g = c.getContext("2d");
+        let r = seed * 9301 + 49297; const rnd = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
+        g.filter = "blur(6px)";
+        for (let k = 0; k < 9; k++) {
+          const x = S * (0.3 + rnd() * 0.4), y = S * (0.36 + rnd() * 0.3), rr = S * (0.14 + rnd() * 0.13);
+          const gr = g.createRadialGradient(x - rr * 0.3, y - rr * 0.45, rr * 0.1, x, y, rr);
+          gr.addColorStop(0, `rgb(${lit})`); gr.addColorStop(0.55, `rgb(${body})`); gr.addColorStop(1, `rgba(${shade},0)`);
+          g.fillStyle = gr; g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fill();
+        }
+        return c;
+      };
+      const sprites = [1, 2, 3, 4].map(sprite);
+      const W = cw, Hh = chh;
+      // Clouds in a shader: seven sheets of cloud at different depths, the camera falling through them. Each sheet is
+      // value-noise cumulus, lit from the upper left (denser toward the light = in its own shadow), and grows and
+      // slides outward as it comes up to meet you, nearer sheets faster: real parallax. A soft veil covers the first
+      // instant. Drawn at about 1100 px across and scaled up: cloud is soft, and phones keep their frame rate.
+      // Without WebGL, the drawn puffs below.
+      let cv = document.createElement("canvas"), glDraw = null;
+      {
+        const k = Math.min(1, 1100 / Math.max(W, Hh));
+        cv.width = Math.round(W * k); cv.height = Math.round(Hh * k);
+        const gl = cv.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false });
+        if (gl) {
+          const FS = `precision highp float;
+uniform vec2 res; uniform float t; uniform vec3 cl, cb, cs;
+float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float n2(vec2 p) { vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(h(i), h(i + vec2(1.0, 0.0)), u.x), mix(h(i + vec2(0.0, 1.0)), h(i + vec2(1.0, 1.0)), u.x), u.y); }
+float fbm(vec2 p) { float v = 0.0, a = 0.5; for (int k = 0; k < 5; k++) { v += a * n2(p); p = mat2(1.6, 1.2, -1.2, 1.6) * p + vec2(3.1, 1.7); a *= 0.5; } return v; }
+void main() {
+  vec2 uv = (gl_FragCoord.xy - 0.5 * res) / min(res.x, res.y);
+  vec3 col = vec3(0.0); float A = 0.0;
+  for (int i = 0; i < 7; i++) {
+    float fi = float(i), z = 0.55 + fi * 0.5 - t * 4.3;
+    if (z < 0.03) continue;
+    vec2 w = uv * z * 1.7 + vec2(fi * 13.7, fi * 5.3);
+    float n = fbm(w), cover = 0.46 + 0.08 * t;
+    float d = smoothstep(cover, cover + 0.2, n) * smoothstep(0.03, 0.42, z);
+    float l = fbm(w + vec2(-0.13, 0.17));
+    float lit = clamp(0.58 + (n - l) * 3.6, 0.0, 1.0);
+    vec3 c = mix(mix(cs, cl, lit), cb, 0.22 * (1.0 - d));
+    col += (1.0 - A) * d * c; A += (1.0 - A) * d;
+  }
+  float veil = 1.0 - smoothstep(0.0, 0.22, t);
+  col += (1.0 - A) * veil * cb; A += (1.0 - A) * veil;
+  gl_FragColor = vec4(col, A);
+}`;
+          const sh = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); return gl.getShaderParameter(o, gl.COMPILE_STATUS) ? o : null; };
+          const vs = sh(gl.VERTEX_SHADER, "attribute vec2 a; void main() { gl_Position = vec4(a, 0.0, 1.0); }"), fs = sh(gl.FRAGMENT_SHADER, FS);
+          const pr = vs && fs && gl.createProgram();
+          if (pr) { gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr); }
+          if (pr && gl.getProgramParameter(pr, gl.LINK_STATUS)) {
+            gl.useProgram(pr);
+            gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+            const a = gl.getAttribLocation(pr, "a"); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+            const U = (n) => gl.getUniformLocation(pr, n), f3 = (c) => c.map((v) => v / 255);
+            gl.uniform2f(U("res"), cv.width, cv.height);
+            gl.uniform3fv(U("cl"), f3(lit)); gl.uniform3fv(U("cb"), f3(body)); gl.uniform3fv(U("cs"), f3(shade));
+            const ut = U("t");
+            gl.viewport(0, 0, cv.width, cv.height);
+            glDraw = (tt) => { gl.uniform1f(ut, tt); gl.drawArrays(gl.TRIANGLES, 0, 3); };
+          }
+        }
+        if (!glDraw) { cv = document.createElement("canvas"); cv.width = W; cv.height = Hh; }
+      }
+      cv.style.cssText = "position:fixed;inset:0;width:100%;height:100%;z-index:50;pointer-events:none";
+      document.body.appendChild(cv);
+      const x = glDraw ? null : cv.getContext("2d");
+      const cx = W / 2, cy = Hh / 2, puffs = [], n = Math.round(Math.min(90, 40 + (W * Hh) / 26000));
+      for (let k = 0; k < n; k++) {   // spread over an ellipse the shape of the screen, a little past its edges
+        const a = Math.random() * Math.PI * 2, rr = Math.sqrt(Math.random()) * 1.2;
+        const size = Math.max(W, Hh) * (0.28 + Math.random() * 0.3) * (0.75 + rr * 0.35);
+        puffs.push({ x: cx + Math.cos(a) * rr * W / 2, y: cy + Math.sin(a) * rr * Hh / 2, r: size / 2, s: 0.8 + Math.random() * 0.5, l: Math.random(), sp: sprites[k % 4] });
+      }
+      puffs.sort((p, q) => p.r - q.r);   // big ones last, on top
+      const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2), out = (t) => 1 - Math.pow(1 - t, 3);
+      const sm = (a, b, t) => { t = Math.max(0, Math.min(1, (t - a) / (b - a))); return t * t * (3 - 2 * t); };
+      const SLOW = Math.max(1, +qs.get("introslow") || 1);   // ?introslow=3: a third of the speed, for recording it smoothly
+      const T0 = performance.now(), CLOUD = 2400 * SLOW, FLY0 = 250 * SLOW, FLY = 2700 * SLOW;
+      let done, finished = false;
+      const promise = new Promise((r) => (done = r));
+      function finish(e) {
+        if (finished) return; finished = true;
+        if (e && e.type) window.track?.("intro: skipped", { after: Math.round((performance.now() - T0) / 100) / 10 + " s" });
+        vp.zoomTo(tz, null, true); vp.panTo(tc, true); vp.applyConstraints(true);
+        cv.remove(); for (const ev of ["pointerdown", "wheel", "keydown"]) removeEventListener(ev, finish, true);
+        done();
+      }
+      for (const ev of ["pointerdown", "wheel", "keydown"]) addEventListener(ev, finish, true);
+      function frame(now) {
+        if (finished) return;
+        const t = now - T0;
+        // the camera: zoom in log space, eased in and out
+        const f = ease(Math.max(0, Math.min(1, (t - FLY0) / FLY)));
+        vp.zoomTo(Math.exp(Math.log(zs) + (Math.log(tz) - Math.log(zs)) * f), null, true); vp.panTo(tc, true);
+        // the clouds: flying through them, they swell and slide outward and thin away
+        const p = Math.min(1, t / CLOUD), g = out(p);
+        if (glDraw) { glDraw(Math.pow(p, 1.12)); if (t >= FLY0 + FLY && p >= 1) return finish(); requestAnimationFrame(frame); return; }
+        x.clearRect(0, 0, W, Hh);
+        const veil = 1 - sm(0.05, 0.42, p);   // the solid layer behind the puffs goes first
+        if (veil > 0) { const vg = x.createLinearGradient(0, 0, 0, Hh); vg.addColorStop(0, `rgba(${lit},${veil})`); vg.addColorStop(1, `rgba(${body},${veil})`); x.fillStyle = vg; x.fillRect(0, 0, W, Hh); }
+        for (const q of puffs) {
+          const k = 1 + g * (1.7 + q.s), px = cx + (q.x - cx) * k, py = cy + (q.y - cy) * k, r = q.r * (1 + g * 1.1);
+          const a = 1 - sm(0.22 + q.l * 0.28, 0.95, p);
+          if (a <= 0.01 || px + r < 0 || py + r < 0 || px - r > W || py - r > Hh) continue;
+          x.globalAlpha = a; x.drawImage(q.sp, px - r, py - r, r * 2, r * 2);
+        }
+        x.globalAlpha = 1;
+        if (t >= FLY0 + FLY && p >= 1) return finish();
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+      window.track?.("intro: play");
+      return promise;
+    }
+    // the toolbar wires up straight away; the live layers load once the map itself is showing
+    window.__cv = map.cv || map.v || "";
+    window.__photo = photo; window.__geo = geo; window.__far = far; window.__mapTiles = map.tiles || "map_files/";
+    const load = (src) => { const s = document.createElement("script"); s.src = src + "?v=" + (map.cv || map.v || ""); document.body.appendChild(s); };
+    load("ui.js"); load("sound.js");   // the sound button works straight away (sound itself is off until you turn it on)
+    const go = () => { for (const src of ["transit.js", "traffic.js", "boats.js", "places.js", "atmosphere.js", "lights.js", "events.js", "minimap.js", "fog.js", "buildings.js", "planes.js", "people.js", "lists.js", "tv.js", "moments.js"]) { const s = document.createElement("script"); s.src = src + "?v=" + (map.cv || map.v || ""); document.body.appendChild(s); } };
+    // (after the opening, so loading them doesn't stutter the fly-in)
+    let started = false; const start = () => { if (!started) { started = true; introDone.then(() => setTimeout(go, 50)); } };
+    mi.addOnceHandler("fully-loaded-change", start);
+    setTimeout(start, 2500);
+    // The photo and the wide backdrop only show where the drawing doesn't reach. When the drawing covers the whole
+    // view (and a margin round it), hide them: OpenSeadragon then neither loads nor paints their tiles, which is
+    // most of the drawing work inside the city. Coverage comes from the drawing's coarsest single tile (~4.5 m/px).
+    const cover = new Image(); cover.crossOrigin = "anonymous";
+    const lvl = Math.ceil(Math.log2(W)) - Math.ceil(Math.log2(W / 1024));
+    cover.src = `${map.tiles || "map_files/"}${lvl}/0_0.webp`;
+    cover.onload = () => {
+      const cw = cover.naturalWidth, ch = cover.naturalHeight, c = Object.assign(document.createElement("canvas"), { width: cw, height: ch }), x = c.getContext("2d", { willReadFrequently: true });
+      x.drawImage(cover, 0, 0);
+      let px; try { px = x.getImageData(0, 0, cw, ch).data; } catch { return; }
+      // summed-area table of cells the drawing doesn't fully cover
+      const S = new Uint32Array((cw + 1) * (ch + 1));
+      for (let j = 0; j < ch; j++) { let row = 0; for (let i = 0; i < cw; i++) { row += px[(j * cw + i) * 4 + 3] < 250 ? 1 : 0; S[(j + 1) * (cw + 1) + i + 1] = S[j * (cw + 1) + i + 1] + row; } }
+      const gaps = (x0, y0, x1, y1) => {   // uncovered cells in a box of drawing pixels (outside the drawing counts as a gap)
+        const f = cw / W; x0 = Math.floor(x0 * f); y0 = Math.floor(y0 * f); x1 = Math.ceil(x1 * f); y1 = Math.ceil(y1 * f);
+        if (x0 < 0 || y0 < 0 || x1 > cw || y1 > ch) return 1;
+        return S[y1 * (cw + 1) + x1] - S[y0 * (cw + 1) + x1] - S[y1 * (cw + 1) + x0] + S[y0 * (cw + 1) + x0];
+      };
+      const inside = (it, b) => { const r = it.getBounds(true); return b.x >= r.x && b.y >= r.y && b.x + b.width <= r.x + r.width && b.y + b.height <= r.y + r.height; };
+      const setOp = (it, o) => { if (it && it.getOpacity() !== o) it.setOpacity(o); };
+      const check = () => {
+        const b = vp.getBounds(true), m = 0.5, eb = new OpenSeadragon.Rect(b.x - b.width * m, b.y - b.height * m, b.width * (1 + 2 * m), b.height * (1 + 2 * m));
+        const a = mi.viewportToImageCoordinates(eb.x, eb.y), z = mi.viewportToImageCoordinates(eb.x + eb.width, eb.y + eb.height);
+        const covered = gaps(a.x, a.y, z.x, z.y) === 0;
+        setOp(photoItem, covered ? 0 : 1);
+        setOp(farItem, covered || (photoItem && inside(photoItem, eb)) ? 0 : 1);
+      };
+      viewer.addHandler("viewport-change", check); check();
+      window.__layerCheck = check;
+    };
+  });
+  // panel and map buttons, as analytics events ("toolbar: places", "toolbar: layer boats", ...)
+  document.addEventListener("click", (e) => { const b = e.target.closest && e.target.closest("[data-act], [data-layer]"); if (b) window.track("toolbar: " + (b.dataset.act || "layer " + b.dataset.layer)); }, true);
+  // the WebGL map drawn black (a browser/GPU bug): once tiles are in, look at what's on the map canvas; if it's all
+  // but black, remember and reload with the plain canvas drawer
+  if (!window.__useCanvas && !/[?&]drawer=webgl/.test(location.search)) viewer.addOnceHandler("open", () => {
+    const check = () => setTimeout(() => {
+      try {
+        const c = viewer.drawer.canvas, w = c.width, h = c.height, x = c.getContext("2d");
+        if (!x || !w) return;
+        const d = x.getImageData(Math.floor(w * 0.3), Math.floor(h * 0.3), Math.floor(w * 0.4), Math.floor(h * 0.4)).data;
+        let sum = 0, n = 0; for (let i = 0; i < d.length; i += 64) { sum += d[i] + d[i + 1] + d[i + 2]; n++; }
+        if (n && sum / n / 3 < 4) { window.track?.("map: webgl black, canvas fallback"); try { localStorage.setItem("sf-drawer", "canvas"); } catch {} location.reload(); }
+      } catch {}
+    }, 1500);
+    const mi = () => window.mapItem;
+    const wait = setInterval(() => { if (mi()) { clearInterval(wait); mi().addOnceHandler("fully-loaded-change", check); } }, 200);
+  });
+  try { localStorage.removeItem("sf-diag"); } catch {}   // the old ?diag readout is gone; clear its leftover flag
+  // ---- analytics: how people arrive, and a summary of each visit when they leave or switch away ----
+  {
+    const q0 = new URLSearchParams(location.search);
+    const entry = q0.has("tv") ? "tv" : q0.has("list") ? "list" : q0.has("stop") ? "stop link" : q0.has("at") ? "shared view" : "home";
+    window.track?.("map: load", { entry, drawer: window.__useCanvas ? "canvas" : "webgl", device: window.__mobile ? "phone" : "desktop", ref: document.referrer ? new URL(document.referrer).hostname : "" });
+    const t0 = Date.now(), seen = new Set(); let maxPxPerM = 0, sent = false, moves = 0;
+    const sample = () => {
+      try {
+        const mi = window.mapItem; if (!mi) return;
+        const z = mi.viewportToImageZoom(viewer.viewport.getZoom(true)) / window.__geo.mpp; if (z > maxPxPerM) maxPxPerM = z;
+        const near = window.__nearestPlace?.(); if (near) seen.add(near);
+      } catch {}
+    };
+    viewer.addHandler("animation-finish", () => { moves++; sample(); });
+    setInterval(sample, 10e3);
+    const summary = () => {
+      if (sent || Date.now() - t0 < 3000) return; sent = true;
+      const secs = Math.round((Date.now() - t0) / 1000);
+      window.track?.("map: visit", { seconds: secs, minutes: secs < 60 ? "<1" : secs < 300 ? "1-5" : secs < 900 ? "5-15" : "15+", moves, deepestZoom: maxPxPerM > 6 ? "street" : maxPxPerM > 1.5 ? "block" : maxPxPerM > 0.4 ? "neighborhood" : "city", places: [...seen].slice(0, 12).join(", "), placesCount: seen.size, entry });
+    };
+    document.addEventListener("visibilitychange", () => { if (document.hidden) summary(); else sent = false; });
+    addEventListener("pagehide", summary);
+  }
+  // if the GPU drops the map's WebGL context (sleep, a driver reset), the tiles go black for good: reload once
+  { const rc = viewer.drawer && viewer.drawer._renderingCanvas;
+    if (rc) rc.addEventListener("webglcontextlost", () => { try { if (sessionStorage.getItem("sf-gl-reload") > Date.now() - 60e3) return; sessionStorage.setItem("sf-gl-reload", Date.now()); } catch {} setTimeout(() => location.reload(), 500); }); }
+  // ---- camera physics ----
+  // Drag: the map sticks to the pointer 1:1, then glides on with momentum and eases to a stop.
+  // Trackpad: two-finger scroll up/down and pinch both zoom around the cursor (shift + scroll pans instead).
+  // Mouse wheel: each notch is a quick eased zoom step around the cursor; double-click zooms 2x (shift: out).
+  // Past the map's edge the glide brakes hard and the view springs back.
+  const vp = viewer.viewport, P = OpenSeadragon.Point;
+  const cam = { vx: 0, vy: 0, glide: false, zoomTo: null, zoomAt: null, samples: [], raf: 0 };
+  const panPx = (dx, dy) => vp.panBy(vp.deltaPointsFromPixels(new P(dx, dy)), true);
+  const outOfBounds = () => { const b = vp.getBounds(true), c = vp.getConstrainedBounds(true); return Math.abs(b.x - c.x) + Math.abs(b.y - c.y) > b.width * 0.002; };
+  function stop() { cam.glide = false; cam.vx = cam.vy = 0; cam.zoomTo = null; }
+  function tick(t) {
+    cam.raf = 0;
+    const dt = Math.min(0.05, (t - (cam.last || t)) / 1000); cam.last = t;
+    let busy = false;
+    if (cam.glide) {
+      panPx(-cam.vx * dt, -cam.vy * dt);
+      const k = Math.exp(-dt / (outOfBounds() ? 0.08 : 0.34));   // friction: a long, natural coast; hard braking past the edge
+      cam.vx *= k; cam.vy *= k;
+      if (Math.hypot(cam.vx, cam.vy) < 12) { cam.glide = false; vp.applyConstraints(); } else busy = true;
+    }
+    if (cam.zoomTo != null) {
+      const z = vp.getZoom(true), nz = z * Math.pow(cam.zoomTo / z, 1 - Math.exp(-dt / 0.085));
+      vp.zoomTo(nz, cam.zoomAt, true);
+      if (Math.abs(Math.log(cam.zoomTo / nz)) < 0.002) { vp.zoomTo(cam.zoomTo, cam.zoomAt, true); cam.zoomTo = null; vp.applyConstraints(); } else busy = true;
+    }
+    if (busy) run(); else cam.last = 0;
+  }
+  const run = () => { if (!cam.raf) cam.raf = requestAnimationFrame(tick); };
+  const clampZoom = (z) => Math.max(vp.getMinZoom(), Math.min(vp.getMaxZoom(), z));
+  function zoomStep(f, pixel) {   // animated zoom around a screen point; quick repeated steps accumulate
+    const base = cam.zoomTo ?? vp.getZoom(true);
+    cam.zoomTo = clampZoom(base * f); cam.zoomAt = vp.pointFromPixel(pixel, true); cam.last = 0; run();
+  }
+  // pins and other overlays hand their drags to the map so a drag that starts on a label still pans
+  function dragBy(dx, dy) { cam.glide = false; cam.zoomTo = null; panPx(-dx, -dy); const now = performance.now(); cam.samples.push({ t: now, x: dx, y: dy }); while (cam.samples.length && now - cam.samples[0].t > 90) cam.samples.shift(); }
+  function release() { const now = performance.now(), S = cam.samples.filter((q) => now - q.t < 90); cam.samples = []; if (S.length >= 2) { const span = Math.max(16, now - S[0].t) / 1000; cam.vx = S.reduce((a, q) => a + q.x, 0) / span; cam.vy = S.reduce((a, q) => a + q.y, 0) / span; const sp = Math.hypot(cam.vx, cam.vy); if (sp > 4200) { cam.vx *= 4200 / sp; cam.vy *= 4200 / sp; } if (sp > 60) { cam.glide = true; cam.last = 0; run(); return; } } vp.applyConstraints(); }
+  window.__cam = { zoomStep, stop, dragBy, release };
+
+  viewer.addHandler("canvas-press", () => stop());
+  viewer.addHandler("canvas-drag", (e) => {
+    if (e.pointerType === "touch" && e.originalEvent.touches && e.originalEvent.touches.length > 1) return;  // pinch: OSD handles it
+    e.preventDefaultAction = true;
+    cam.glide = false; cam.zoomTo = null;
+    panPx(-e.delta.x, -e.delta.y);
+    const now = performance.now();
+    cam.samples.push({ t: now, x: e.delta.x, y: e.delta.y });
+    while (cam.samples.length && now - cam.samples[0].t > 90) cam.samples.shift();   // velocity from the last ~90 ms
+  });
+  viewer.addHandler("canvas-drag-end", (e) => {
+    e.preventDefaultAction = true;
+    const now = performance.now(), S = cam.samples.filter((q) => now - q.t < 90);
+    cam.samples = [];
+    if (S.length >= 2) {
+      const span = Math.max(16, now - S[0].t) / 1000;
+      cam.vx = S.reduce((a, q) => a + q.x, 0) / span; cam.vy = S.reduce((a, q) => a + q.y, 0) / span;
+      const sp = Math.hypot(cam.vx, cam.vy), max = 4200;
+      if (sp > max) { cam.vx *= max / sp; cam.vy *= max / sp; }
+      if (sp > 60) { cam.glide = true; cam.last = 0; run(); return; }
+    }
+    vp.applyConstraints();
+  });
+  // Wheel / trackpad: read straight from the browser (OSD drops scroll events closer than 50 ms apart, which
+  // made trackpad pans and pinches stutter), summed up and applied once per frame.
+  const wheel = { dx: 0, dy: 0, zl: 0, at: null, raf: 0 };
+  function applyWheel() {
+    wheel.raf = 0;
+    if (wheel.dx || wheel.dy) panPx(wheel.dx, wheel.dy);
+    if (wheel.zl) vp.zoomTo(clampZoom(vp.getZoom(true) * Math.exp(wheel.zl)), vp.pointFromPixel(wheel.at, true), true);
+    wheel.dx = wheel.dy = wheel.zl = 0;
+    clearTimeout(cam.settle); cam.settle = setTimeout(() => vp.applyConstraints(), 180);
+  }
+  viewer.container.addEventListener("wheel", (ev) => {
+    if (ev.target.closest && ev.target.closest(".bar, .drop, #card, .status, .sq")) return;   // let the panel scroll normally
+    ev.preventDefault(); ev.stopPropagation();
+    const r = viewer.container.getBoundingClientRect(), at = new P(ev.clientX - r.left, ev.clientY - r.top);
+    const unit = ev.deltaMode === 1 ? 16 : ev.deltaMode === 2 ? 400 : 1;
+    const mouseWheel = ev.deltaMode !== 0 || (ev.deltaX === 0 && Math.abs(ev.deltaY) >= 40 && Number.isInteger(ev.deltaY));
+    if (ev.ctrlKey) { stop(); wheel.zl += -ev.deltaY * unit * 0.011; wheel.at = at; }          // trackpad pinch: follow the fingers
+    else if (mouseWheel) { zoomStep(Math.pow(1.45, -Math.sign(ev.deltaY) * Math.min(3, Math.abs(ev.deltaY * unit) / 100 || 1)), at); return; }  // a notch: one eased step
+    else if (ev.shiftKey) { cam.glide = false; wheel.dx += ev.deltaX * unit; wheel.dy += ev.deltaY * unit; }   // shift + scroll: pan 1:1
+    else { stop(); wheel.zl += -ev.deltaY * unit * 0.004; wheel.at = at; }   // two-finger scroll: zoom around the cursor (up = in)
+    if (!wheel.raf) wheel.raf = requestAnimationFrame(applyWheel);
+  }, { passive: false, capture: true });
+  viewer.addHandler("canvas-double-click", (e) => { e.preventDefaultAction = true; zoomStep(e.shift ? 0.5 : 2, e.position); });
+});
+</script>
+<script>
+// point the compass's needle (and its N) at north on screen, from the camera itself
+(async () => {
+  while (!window.__transit) await new Promise((r) => setTimeout(r, 300));
+  const { G, toImage } = window.__transit, a = toImage(G.toWorld(37.77, -122.42)), b = toImage(G.toWorld(37.78, -122.42));
+  const deg = Math.atan2(b[0] - a[0], -(b[1] - a[1])) * 180 / Math.PI, el = document.querySelector(".sq .compass");
+  if (!el) return;
+  el.querySelector(".needle").setAttribute("transform", `rotate(${deg.toFixed(1)} 22 22)`);
+  const r = deg * Math.PI / 180, lbl = el.querySelector(".lbl"); lbl.setAttribute("x", (22 + Math.sin(r) * 13.5).toFixed(1)); lbl.setAttribute("y", (22 - Math.cos(r) * 13.5).toFixed(1));
+  el.querySelector(".n").setAttribute("d", "M22 10l4 12h-8z"); el.querySelector(".s").setAttribute("d", "M22 34l-4-12h8z");
+  const dir = ["up", "upper right", "right", "lower right", "down", "lower left", "left", "upper left"][Math.round(((deg % 360) + 360) % 360 / 45) % 8];
+  el.setAttribute("aria-label", "Compass: north points " + dir + " on this map");
+})();
+</script>
+</body>
+</html>
